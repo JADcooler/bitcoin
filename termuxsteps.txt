@@ -1,0 +1,7 @@
+install trermux from fdroid
+type termux-change-repo
+select albatross
+pkg upgrade
+pip install rsa
+python3 main.py
+
