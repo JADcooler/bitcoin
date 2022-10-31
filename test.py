@@ -23,12 +23,3 @@ d=d.save_pkcs1()
 print(d.decode('UTF-8'))
 #print(d.decode('UTF-8'))
 #end
-
-
-
-
-
-
-
-
-
