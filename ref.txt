@@ -26,3 +26,13 @@ amount
 pubkeyscript - contains text encrypted by private key of spender and the full public key of spender
 locktime 
 
+#me
+transactions are valid only when they are in a block. 
+you can only specifiy valid transactions in your transaction input (they are in some block)
+
+#irl	
+TIL the the UTXO set includes unconfirmed transactions in the mempool. This explains how unconfirmed outputs can be spent before being mined. Thanks! – 
+Jonathan Cross
+Sep 17, 2019 at 19:24
+https://bitcoin.stackexchange.com/questions/90426/bitcoin-check-if-the-transaction-is-valid
+#lolll

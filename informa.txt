@@ -1,0 +1,6 @@
+assuming that UTXOs from mempool are invalid
+
+sequence number in a transaction is related to locktime, but I'm using
+it for identifying it.
+
+
