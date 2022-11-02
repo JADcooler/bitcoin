@@ -36,3 +36,10 @@ Jonathan Cross
 Sep 17, 2019 at 19:24
 https://bitcoin.stackexchange.com/questions/90426/bitcoin-check-if-the-transaction-is-valid
 #lolll
+
+
+for multiple inouts in transactiuon combine index,seqn of them all
+and for using it we provide a the combined stuff as signature then verif
+i.e str(t1,t2,t3) as inputs index,sueqne no and sign(t1t2t3) as script
+
+

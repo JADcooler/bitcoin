@@ -1,7 +1,8 @@
 from socket import *
 import rsa
 import hashlib
-
+import sys
+import ast #to literal evaluate dictionary
 '''
 (pubkey, privkey) = rsa.newkeys(512)
 with open('privatepublickeys.txt',mode='a+') as file:
@@ -25,35 +26,56 @@ print(publ.save_pkcs1().decode('utf-8'))
 '''
 
 print('enter option\n1.Make Transaction\n ')
-s=int(input())
+print('2.check balance')
+s=2 #int(input())
 
 if(s==1):
-	print('Enter pubkey hash of reciever')
-	recv_scr= input()
+	#print('Enter pubkey hash of reciever')
+	#recv_scr= input()
 	transaction = {}
 	transaction['version']=1.0
 	#inputs reference UTXO
 	transaction['output_index']= 0
 	transaction['sequence']=0
 	s=str(transaction['output_index'])+str(transaction['sequence'])
-	k={'signature': rsa.encrypt(k.encode('UTF-8'),priv), 'public':pub_str.encode('base64') }
+	u=rsa.encrypt(s.encode('UTF-8'),priv)
+	w=pub_str
+	k={'signature':u, 'public': w }
 	transaction['signature_scr']=k
 	#outputs
 	transaction['output_number']=3
 	transaction['amount']=100
 	transaction['pubkey_scr']=hashlib.sha256(pub_byt).hexdigest()
 	transaction['locktime']=transaction['sequence']
-	with open('mempool.txt',mode='a+') as file:
-		print(str(transaction))
-		x=str(transaction).encode('base64')
-		print(x)
-		file.write(x)
+
 	s=socket(AF_INET, SOCK_DGRAM)
 	s.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
 	tran_message = str(transaction)
+	print(sys.getsizeof('transaction'))
+	print(sys.getsizeof(tran_message))
 	s.sendto('transaction'.encode(),('255.255.255.255',12345))
 	s.sendto(tran_message.encode(),('255.255.255.255',12345))
 
+elif(s==2):
+	x=1
+	balance = 0 
+	with open('mempool.txt',mode='r') as file:
+		trans=file.read().split('\n')
+		print(trans)
+		trans=trans[:-1]
+		print(len(trans))
+		for tran in trans:
+			print('checking transaction ',x)
+			x+=1
+			print(tran,'\n')
+			print(type(tran))
+			tr = ast.literal_eval(tran)
+			#print(type(tr))
 
+			print(tr)
+			digest = tr['pubkey_scr']
+			if(hashlib.sha256(pub_byt).hexdigest()==digest):
+				balance+=tr['amount']
+			#signed_content=str(tr['output_index'])+str(tr['sequence'])
+		print('\n\nBALANCE IS ',balance)
 #end
-
