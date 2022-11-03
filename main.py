@@ -25,9 +25,10 @@ print(priv.save_pkcs1().decode('utf-8'))
 print(publ.save_pkcs1().decode('utf-8'))
 '''
 
-print('enter option\n1.Make Transaction\n ')
-print('2.check balance')
-print('\n3. mine current block\n')
+print('Enter option\n\n0.Show pubkey hash\n')
+print('1.Make Transaction\n ')
+print('2.check balance\n')
+print('3. mine current block\n')
 s= int(input())
 
 
@@ -37,7 +38,10 @@ def gettxid():
 		x+=1
 	return x
 
-if(s==1):
+if(s==0):
+	print(hashlib.sha256(pub_byt).hexdigest())
+
+elif(s==1):
 	#print('Enter pubkey hash of reciever')
 	#recv_scr= input()
 	transaction = {}
