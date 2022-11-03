@@ -43,3 +43,4 @@ and for using it we provide a the combined stuff as signature then verif
 i.e str(t1,t2,t3) as inputs index,sueqne no and sign(t1t2t3) as script
 
 
+input scriptsig and pubkey script as lists to support multiple recievers

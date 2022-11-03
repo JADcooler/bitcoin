@@ -27,7 +27,15 @@ print(publ.save_pkcs1().decode('utf-8'))
 
 print('enter option\n1.Make Transaction\n ')
 print('2.check balance')
-s=2 #int(input())
+print('\n3. mine current block\n')
+s= int(input())
+
+
+def gettxid():
+	x=0
+	with open('mempool.txt') as file:
+		x+=1
+	return x
 
 if(s==1):
 	#print('Enter pubkey hash of reciever')
@@ -35,7 +43,7 @@ if(s==1):
 	transaction = {}
 	transaction['version']=1.0
 	#inputs reference UTXO
-	transaction['output_index']= 0
+	transaction['output_index']= gettxid()
 	transaction['sequence']=0
 	s=str(transaction['output_index'])+str(transaction['sequence'])
 	u=rsa.encrypt(s.encode('UTF-8'),priv)
@@ -78,4 +86,27 @@ elif(s==2):
 				balance+=tr['amount']
 			#signed_content=str(tr['output_index'])+str(tr['sequence'])
 		print('\n\nBALANCE IS ',balance)
+
+elif(s==3):
+	with open('currentblock.txt',mode ='r') as file:
+		listr=[]
+		for tran in file:
+			listr.append(tran)
+	#coinbase transaction
+	transaction = {}
+	transaction['version']=1.0
+	#inputs reference UTXO
+	transaction['output_index']= gettxid()
+	transaction['sequence']=0
+	s=str(transaction['output_index'])+str(transaction['sequence'])
+	u=rsa.encrypt(s.encode('UTF-8'),priv)
+	w=pub_str
+	k={'signature':u, 'public': w }
+	transaction['signature_scr']=k
+	#outputs
+	transaction['output_number']=3
+	transaction['amount']=100
+	transaction['pubkey_scr']=hashlib.sha256(pub_byt).hexdigest()
+	transaction['locktime']=transaction['sequence']
+
 #end

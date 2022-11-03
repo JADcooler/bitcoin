@@ -16,12 +16,17 @@ if(x=='transaction'):
 		file.write(str(trans)+'\n')
 
 print('contents of mempool.txt')
-x=1
+x=0
 with open('mempool.txt') as file:
 	for tran in file:
 		print(x)
 		x+=1
 		print(tran,'\n')
+if(x==5):
+	with open('mempool.txt',mode='r') as f:
+		for tran in file:
+			with open('currentblock.txt',mode='a+'):
+				print(tran,'\n')
 #end
 
 

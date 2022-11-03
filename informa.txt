@@ -3,4 +3,9 @@ assuming that UTXOs from mempool are invalid
 sequence number in a transaction is related to locktime, but I'm using
 it for identifying it.
 
+solo mining heyn
+
+so, in actual bitcoin. the number of transactions in a block is determined
+by the number of transactions that take place in the last ten minutes.
+Imma assume the no of transactions is fixed in a block (5)
 
