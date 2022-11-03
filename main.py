@@ -19,6 +19,8 @@ with open('public_key.pem') as file:
 	publ = rsa.PublicKey.load_pkcs1(pub_byt)
 
 
+
+pubkeyhash = hashlib.sha256(pub_byt).hexdigest()
 #checking private and public keys
 '''
 print(priv.save_pkcs1().decode('utf-8'))
@@ -31,7 +33,46 @@ print('2.check balance\n')
 print('3. mine current block\n')
 s= int(input())
 
+def transaction(recv_scr,a,b):
+	transaction = {}
+	transaction['version']=1.0
+	#inputs reference UTXO
+	transaction['output_index']= a
+	transaction['sequence']=b
+	s=str(transaction['output_index'])+str(transaction['sequence'])
+	u=rsa.encrypt(s.encode('UTF-8'),priv)
+	w=pub_str
+	k={'signature':u, 'public': w }
+	transaction['signature_scr']=k
+	#outputs
+	transaction['output_number']=3
+	transaction['amount']=100
+	transaction['pubkey_scr']=recv_scr
+	transaction['locktime']=transaction['sequence']
 
+def check_balance():
+	combos=[]
+	with open('mempool.txt') as file:
+		for tran in file:
+			tr=ast.literal_eval(tran)
+			if(tr['pubkey_scr']==pubkeyhash):
+				combos.append((tr['output_index'],tr['sequence'],tr['amount']))
+	freqc = {}
+	for combo in combos:
+		freqc[combo]=0
+	print(freqc)
+	with open('mempool.txt') as file:
+		for tran in file:
+			tr=ast.literal_eval(tran)
+			combo=((int(tr['output_index']),int(tr['sequence']),int(tr['amount'])))
+			freqc[combo]+=1
+
+	balance=0
+	print(freqc)
+	for key,val in freqc.items():
+		if(val==1):
+			 balance+=key[2]
+	print('\nBALANCE IS ',balance)
 def gettxid():
 	x=0
 	with open('mempool.txt') as file:
@@ -42,13 +83,31 @@ if(s==0):
 	print(hashlib.sha256(pub_byt).hexdigest())
 
 elif(s==1):
-	#print('Enter pubkey hash of reciever')
-	#recv_scr= input()
+	combos = []
+	with open('mempool.txt') as file:
+		for tran in file:
+			tr=ast.literal_eval(tran)
+			if(tr['pubkey_scr']==pubkeyhash):
+				combos.append((tr['output_index'],tr['sequence'],tr['amount']))
+
+
+
+
+	print('Enter pubkey hash of reciever')
+	recv_scr= input()
+
+	print('combos are ')
+	for combo in combos:
+		print(combo[:2], 'amount : ',combo[2])
+
+	print('Enter UTXO to use')
+	a=input()
+	b=input()
 	transaction = {}
 	transaction['version']=1.0
 	#inputs reference UTXO
-	transaction['output_index']= gettxid()
-	transaction['sequence']=0
+	transaction['output_index']= a
+	transaction['sequence']=b
 	s=str(transaction['output_index'])+str(transaction['sequence'])
 	u=rsa.encrypt(s.encode('UTF-8'),priv)
 	w=pub_str
@@ -57,7 +116,7 @@ elif(s==1):
 	#outputs
 	transaction['output_number']=3
 	transaction['amount']=100
-	transaction['pubkey_scr']=hashlib.sha256(pub_byt).hexdigest()
+	transaction['pubkey_scr']=recv_scr
 	transaction['locktime']=transaction['sequence']
 
 	s=socket(AF_INET, SOCK_DGRAM)
@@ -69,6 +128,9 @@ elif(s==1):
 	s.sendto(tran_message.encode(),('255.255.255.255',12345))
 
 elif(s==2):
+	check_balance()
+
+	'''
 	x=1
 	balance = 0 
 	with open('mempool.txt',mode='r') as file:
@@ -90,6 +152,7 @@ elif(s==2):
 				balance+=tr['amount']
 			#signed_content=str(tr['output_index'])+str(tr['sequence'])
 		print('\n\nBALANCE IS ',balance)
+	'''
 
 elif(s==3):
 	with open('currentblock.txt',mode ='r') as file:
