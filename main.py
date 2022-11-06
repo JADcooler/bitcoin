@@ -106,6 +106,7 @@ elif(s==1):
 	transaction = {}
 	transaction['version']=1.0
 	#inputs reference UTXO
+	transaction['trans_identifier']=123;
 	transaction['output_index']= a
 	transaction['sequence']=b
 	s=str(transaction['output_index'])+str(transaction['sequence'])
@@ -119,6 +120,13 @@ elif(s==1):
 	transaction['pubkey_scr']=recv_scr
 	transaction['locktime']=transaction['sequence']
 
+
+	#finding hash of transaction to store it in a dictioanry / hash table
+	trans_string = str(transaction)
+	trans_byt = trans_string.encode()
+	transaction_hash=hashlib.sha256(trans_byte).hexdigest()
+
+	#broadcasting updated transaction
 	s=socket(AF_INET, SOCK_DGRAM)
 	s.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
 	tran_message = str(transaction)
@@ -133,7 +141,7 @@ elif(s==2):
 	'''
 	x=1
 	balance = 0 
-	with open('mempool.txt',mode='r') as file:
+q	with open('mempool.txt',mode='r') as file:
 		trans=file.read().split('\n')
 		print(trans)
 		trans=trans[:-1]
@@ -176,4 +184,39 @@ elif(s==3):
 	transaction['pubkey_scr']=hashlib.sha256(pub_byt).hexdigest()
 	transaction['locktime']=transaction['sequence']
 
+	listr.insert(0,str(transaction))
+	blockheaders=[]
+	with open('blocks.txt',mode='r') as blocks:
+		for block in blocks:
+			blockheaders=ast.literal_eval(block)[0]
+	prevheader=blockheaders[-1] #get last header
+	t1=str(listr[0])+str(listr[1])
+	t1=hashlib.sha256(t1).hexdigest()
+	t2=str(listr[2])+str(listr[3])
+	t2=hashlib.sha256(t2).hexdigest()
+	t3=str(listr[4])+str(listr[5])
+	t3=hashlib.sha256(t3).hexdigest()
+	t12=t1+t2
+	t12=hashlib.sha256(t12).hexdigest()
+	t123=t12+t3
+	t123=hashlib.sha267(t123).hexdigest()
+	merkleroot = t123
+
+	nonce=0
+	for n in range(100000000):
+		blockheader = [prevheader,merkleroot,n]
+		check = hashlib,sha256(blockheader.encode()).hexdigest()
+		if(hexdigest[0]=='0' and hexdigest[1]=='0'):
+			nonce = n
+			break
+	block = [blockheader, prevheader, merkleroot, nonce]
+
+	s.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
+	tran_message = str(transaction)
+	print(sys.getsizeof('transaction'))
+	print(sys.getsizeof(tran_message))
+	s.sendto('block'.encode(),('255.255.255.255',12345))
+	s.sendto(block.encode(),('255.255.255.255',12345))
+
 #end
+
