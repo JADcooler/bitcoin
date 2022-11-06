@@ -1,6 +1,6 @@
-from socket import *
-import rsa
-import hashlib
+from socket import * #p2p network
+import rsa #for keys
+import hashlib	# sha256
 import sys
 import ast #to literal evaluate dictionary
 '''
@@ -26,25 +26,28 @@ pubkeyhash = hashlib.sha256(pub_byt).hexdigest()
 print(priv.save_pkcs1().decode('utf-8'))
 print(publ.save_pkcs1().decode('utf-8'))
 '''
-
+#menu options
 print('Enter option\n\n0.Show pubkey hash\n')
 print('1.Make Transaction\n ')
 print('2.check balance\n')
 print('3. mine current block\n')
 s= int(input())
 
-def transaction(recv_scr,a,b):
+def make_transaction(recv_scr,a,b):
 	transaction = {}
 	transaction['version']=1.0
 	#inputs reference UTXO
+	#list of inputs
+	transaction['trans_identifier']=123;
 	transaction['output_index']= a
 	transaction['sequence']=b
-	s=str(transaction['output_index'])+str(transaction['sequence'])
-	u=rsa.encrypt(s.encode('UTF-8'),priv)
+	s=str(transaction['output_index'])+str(transaction['trans_identifier'])
+	s=rsa.encrypt(s.encode('UTF-8'),priv)
 	w=pub_str
-	k={'signature':u, 'public': w }
+	k={'signature':s, 'public': w }
 	transaction['signature_scr']=k
 	#outputs
+	#list of outputs
 	transaction['output_number']=3
 	transaction['amount']=100
 	transaction['pubkey_scr']=recv_scr
@@ -104,6 +107,8 @@ elif(s==1):
 	a=input()
 	b=input()
 	transaction = {}
+
+	'''
 	transaction['version']=1.0
 	#inputs reference UTXO
 	transaction['trans_identifier']=123;
@@ -119,14 +124,14 @@ elif(s==1):
 	transaction['amount']=100
 	transaction['pubkey_scr']=recv_scr
 	transaction['locktime']=transaction['sequence']
-
+	'''
 
 	#finding hash of transaction to store it in a dictioanry / hash table
 	trans_string = str(transaction)
 	trans_byt = trans_string.encode()
 	transaction_hash=hashlib.sha256(trans_byte).hexdigest()
 
-	#broadcasting updated transaction
+	#broadcasting transaction
 	s=socket(AF_INET, SOCK_DGRAM)
 	s.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
 	tran_message = str(transaction)
@@ -163,27 +168,7 @@ q	with open('mempool.txt',mode='r') as file:
 	'''
 
 elif(s==3):
-	with open('currentblock.txt',mode ='r') as file:
-		listr=[]
-		for tran in file:
-			listr.append(tran)
-	#coinbase transaction
-	transaction = {}
-	transaction['version']=1.0
-	#inputs reference UTXO
-	transaction['output_index']= gettxid()
-	transaction['sequence']=0
-	s=str(transaction['output_index'])+str(transaction['sequence'])
-	u=rsa.encrypt(s.encode('UTF-8'),priv)
-	w=pub_str
-	k={'signature':u, 'public': w }
-	transaction['signature_scr']=k
-	#outputs
-	transaction['output_number']=3
-	transaction['amount']=100
-	transaction['pubkey_scr']=hashlib.sha256(pub_byt).hexdigest()
-	transaction['locktime']=transaction['sequence']
-
+	make_transaction()
 	listr.insert(0,str(transaction))
 	blockheaders=[]
 	with open('blocks.txt',mode='r') as blocks:
