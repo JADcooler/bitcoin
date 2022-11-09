@@ -31,29 +31,68 @@ print('Enter option\n\n0.Show pubkey hash\n')
 print('1.Make Transaction\n ')
 print('2.check balance\n')
 print('3. mine current block\n')
-s= int(input())
+s=2 # int(input())
 
-def make_transaction(recv_scr,a,b):
+def make_transaction(inputs, outputs):
 	transaction = {}
 	transaction['version']=1.0
 	#inputs reference UTXO
 	#list of inputs
-	transaction['trans_identifier']=123;
-	transaction['output_index']= a
-	transaction['sequence']=b
+
+	transaction['inputs']=inputs
+	'''
+	transaction['trans_identifier']=prev_tran
+	transaction['output_index']= index
+	transaction['sequence']=1
 	s=str(transaction['output_index'])+str(transaction['trans_identifier'])
 	s=rsa.encrypt(s.encode('UTF-8'),priv)
 	w=pub_str
 	k={'signature':s, 'public': w }
 	transaction['signature_scr']=k
+	'''
+
 	#outputs
 	#list of outputs
+	transaction['outputs'] = outputs 
+
+	'''
+	output={'output_no': 0, 'amount':100, 'pubkey_scr':recv_scr, 'locktime': transaction['sequence'] }
+	transaction['outputs'].append(output)
+
+	output={'output_no': 1, 'amount':total_amount - amount - tran_fee, 'pubkey_scr':pubkeyhash  , 'locktime': 0 }
+	transaction['outputs'].append(output)
+	'''
+	'''
 	transaction['output_number']=3
 	transaction['amount']=100
 	transaction['pubkey_scr']=recv_scr
 	transaction['locktime']=transaction['sequence']
+	'''
+	return transaction
+
+
+transactions_recv= []
 
 def check_balance():
+	#first we check all transactions recieved to us
+	print(pubkeyhash,'\n')
+	with open('blocks.txt', mode = 'r') as file:
+		x=file.read()
+		print('readed line ',x)
+		trans = ast.literal_eval(x)[1]
+		for y in trans.items():
+			i=y[1]
+			tr = ast.literal_eval(i)
+			#print(type(tr),tr)
+			print('trans: ',y[0])
+			for x in tr['outputs']:
+				print(x['output_no'],x['pubkey_scr'])
+				if(x['pubkey_scr']==pubkeyhash):
+					transactions_recv.append((y[0],x['output_no']))
+	print(transactions_recv)
+
+
+	'''
 	combos=[]
 	with open('mempool.txt') as file:
 		for tran in file:
@@ -76,6 +115,8 @@ def check_balance():
 		if(val==1):
 			 balance+=key[2]
 	print('\nBALANCE IS ',balance)
+	'''
+
 def gettxid():
 	x=0
 	with open('mempool.txt') as file:
@@ -86,45 +127,43 @@ if(s==0):
 	print(hashlib.sha256(pub_byt).hexdigest())
 
 elif(s==1):
-	combos = []
-	with open('mempool.txt') as file:
-		for tran in file:
-			tr=ast.literal_eval(tran)
-			if(tr['pubkey_scr']==pubkeyhash):
-				combos.append((tr['output_index'],tr['sequence'],tr['amount']))
+	print('Enter receiver pubkey hash')
+	recrhash= input()
+	selfhash = pubkeyhash
+
+	print('Enter amount to send (integer)')
+	amount= input()
+
+	print('Enter transaction fees (integer)')
+	tran_fee = input()
 
 
+	#start code to find belonging UTXOs
 
 
-	print('Enter pubkey hash of reciever')
-	recv_scr= input()
+	total_amount
+	#end
 
-	print('combos are ')
-	for combo in combos:
-		print(combo[:2], 'amount : ',combo[2])
-
-	print('Enter UTXO to use')
-	a=input()
-	b=input()
-	transaction = {}
-
-	'''
-	transaction['version']=1.0
-	#inputs reference UTXO
-	transaction['trans_identifier']=123;
-	transaction['output_index']= a
-	transaction['sequence']=b
-	s=str(transaction['output_index'])+str(transaction['sequence'])
-	u=rsa.encrypt(s.encode('UTF-8'),priv)
+#	s=str(transaction['output_index'])+str(transaction['trans_identifier'])
+	s='2'
+	s=rsa.encrypt(s.encode('UTF-8'),priv)
 	w=pub_str
-	k={'signature':u, 'public': w }
-	transaction['signature_scr']=k
-	#outputs
-	transaction['output_number']=3
-	transaction['amount']=100
-	transaction['pubkey_scr']=recv_scr
-	transaction['locktime']=transaction['sequence']
-	'''
+	k={'signature':s, 'public': w }
+
+	input = {'trans_identity': 1,'outputnoofprev': 1,'sequence': 1 ,'sigscript':k}
+
+	all_outpust=[]
+
+
+	output={'output_no': 0, 'amount':amount, 'pubkey_scr':recrhash, 'locktime': transaction['sequence'] }
+	all_outputs.append(output)
+
+	output={'output_no': 1, 'amount':total_amount - amount - tran_fee, 'pubkey_scr':selfhash  , 'locktime': 0 }
+	all_outputs.append(output)
+
+
+	transaction = make_transaction()
+
 
 	#finding hash of transaction to store it in a dictioanry / hash table
 	trans_string = str(transaction)
@@ -143,29 +182,6 @@ elif(s==1):
 elif(s==2):
 	check_balance()
 
-	'''
-	x=1
-	balance = 0 
-q	with open('mempool.txt',mode='r') as file:
-		trans=file.read().split('\n')
-		print(trans)
-		trans=trans[:-1]
-		print(len(trans))
-		for tran in trans:
-			print('checking transaction ',x)
-			x+=1
-			print(tran,'\n')
-			print(type(tran))
-			tr = ast.literal_eval(tran)
-			#print(type(tr))
-
-			print(tr)
-			digest = tr['pubkey_scr']
-			if(hashlib.sha256(pub_byt).hexdigest()==digest):
-				balance+=tr['amount']
-			#signed_content=str(tr['output_index'])+str(tr['sequence'])
-		print('\n\nBALANCE IS ',balance)
-	'''
 
 elif(s==3):
 	make_transaction()
