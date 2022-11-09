@@ -127,8 +127,44 @@ for i in range(1,len(hashes),2):
 	blockheader['merkle']=s
 
 
+
+print('block header is ',blockheader)
+
+string_bh = str(blockheader)
+
+#print(string_bh)
+
+q=string_bh.encode()
+print(q)
+
+for i in range(1000000000):
+	blockheader['nonce']=i
+	bh = str(blockheader)
+	x= bh.encode()
+	x = hashlib.sha256(x).hexdigest()
+	print(x)
+	if(int(x[:4],base=16) ==0):
+		blockheader['nonce']=i
+		print('SUCCESS')
+		break
+
+
+print('nonce is ', blockheader['nonce'])
+x = hashlib.sha256(str(blockheader).encode()).hexdigest()
+print('blockheader hash is ',x)
+
+blocktoentry = []
+blocktoentry.append(blockheader)
+blocktoentry.append(blocks)
+
+#contents
+
+
 with open('blocks.txt',mode='w') as file:
-	file.write(str(blocks)+'\n')
+	file.write(str(blocktoentry)+'\n')
+#genesis block, its a list
+#first element contains block header
+#second element cointains transactions
+
 
 #end of program
-
