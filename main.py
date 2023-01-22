@@ -73,6 +73,11 @@ def make_transaction(inputs, outputs):
 
 transactions_recv= []
 
+def sigscript(txid, outputno):
+	enc_mes = txid+str(outputno)
+	enc_mes = rsa.encrypt(enc_mes.encode(), priv)
+	print(enc_mes, type(enc_mes) )
+
 def check_balance():
 	#first we check all transactions recieved to us
 	print(pubkeyhash,'\n')
@@ -90,6 +95,13 @@ def check_balance():
 				if(x['pubkey_scr']==pubkeyhash):
 					transactions_recv.append((y[0],x['output_no']))
 	print(transactions_recv)
+	UTXO={}
+	for i in transactions_recv:
+		UTXO[i]=0
+	tranrecv_outputs=[]
+	test = transactions_recv[0]
+	sigscript(test[0],test[1]  )
+
 
 
 	'''

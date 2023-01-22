@@ -1,0 +1,3 @@
+if order of transaction is so important to determine merkle root
+what keeps them fixed? what if i recieve one after another though their
+order is vice-verca?
