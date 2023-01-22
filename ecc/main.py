@@ -31,6 +31,8 @@ s= int(input())
 publickey_hash = hashlib.sha256(public_key.to_string()).hexdigest()
 
 
+
+
 def make_transaction(inputs, outputs):
 	transaction = {}
 	transaction['version']=1.0
@@ -68,6 +70,34 @@ def make_transaction(inputs, outputs):
 	'''
 	return transaction
 
+#We have the requirement to find spent and unspent transacion outputs.
+#To start things off, we are gonna make a function to spend UTXOs
+
+	'''
+	transaction['trans_identifier']=prev_tran
+	transaction['output_index']= index
+	transaction['sequence']=1
+	s=str(transaction['output_index'])+str(transaction['trans_identifier'])
+	s=rsa.encrypt(s.encode('UTF-8'),priv)
+	w=pub_str
+	k={'signature':s, 'public': w }
+	transaction['signature_scr']=k
+	'''
+def make_inp(prev_tran, output_index):
+	input = {}
+	#needs 4 things
+	#prev_tran
+	input['prev_tran'] = prev_tran
+	#output_index
+	input['output_index'] = output_index
+	#sequence 
+	input['sequence'] = '0xFFFFFFFF' #it's a value ignored by bitcoin
+	#signature script
+	add = str(prev_tran) + str(output_index)
+	#TODO
+
+
+
 
 transactions_recv= []
 
@@ -79,7 +109,11 @@ def UTXOs():
 	balances = ast.literal_eval(dict_str) #check if cache of utxo stored
 
 	if latest_block in balances:
-		return
+		print('CACHE HIT')
+		global transactions_recv
+		transactions_recv = balances[latest_block]
+		#print(transactions_recv)
+		return balances[latest_block]
 
 	with open('blocks/'+latest_block, mode='r') as f:
 		block_str = f.read()
@@ -90,6 +124,9 @@ def UTXOs():
 		for output in outputs:
 			if(output['pubkey_scr']==publickey_hash):
 				transactions_recv.append((item[0],output['output_no'],output['amount']))
+	balances[latest_block] = transactions_recv
+	with open('usr_cache/balances.txt', mode='w') as f:
+		f.write(str(balances))
 	return transactions_recv
 
 
@@ -102,6 +139,8 @@ def check_balance():
 		trans = ast.literal_eval(x)[1]
 		for y in trans.items():
 			i=y[1]
+
+
 			tr = ast.literal_eval(i)
 			#print(type(tr),tr)
 			print('trans: ',y[0])
@@ -209,6 +248,7 @@ elif(s==1):
 elif(s==2):
 	print(UTXOs())
 	sum = 0
+	#print('asd', transactions_recv)
 	for tr in transactions_recv:
 		sum += tr[2]
 	print("\n\nnet balance is ",sum)
