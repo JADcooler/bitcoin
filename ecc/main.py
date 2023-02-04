@@ -106,6 +106,7 @@ def make_inp(prev_tran, output_index):
 	d_publicKey = VerifyingKey.from_string(d_publ)
 	x = d_publicKey.verify(d_sign, plainText.encode())
 	print(x)
+	#YAY
 
 
 
