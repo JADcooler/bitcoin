@@ -26,6 +26,7 @@ print('Enter option\n\n0.Show pubkey hash\n')
 print('1.Make Transaction\n ')
 print('2.check balance\n')
 print('3. mine current block\n')
+print('4. TEST\n')
 s= int(input())
 
 publickey_hash = hashlib.sha256(public_key.to_string()).hexdigest()
@@ -93,8 +94,19 @@ def make_inp(prev_tran, output_index):
 	#sequence 
 	input['sequence'] = '0xFFFFFFFF' #it's a value ignored by bitcoin
 	#signature script
-	add = str(prev_tran) + str(output_index)
+	plainText = str(prev_tran) + str(output_index)
 	#TODO
+	cipherText = private_key.sign(plainText.encode()) #string to byte
+	signature = cipherText.decode('ISO-8859-1') #byte to string
+	pkString = public_key.to_string().decode('ISO-8859-1')
+	sigScr = {'signature': signature, 'publicKey': pkString}
+	print(sigScr)
+	d_sign = sigScr['signature'].encode('ISO-8859-1')
+	d_publ = sigScr['publicKey'].encode('ISO-8859-1')
+	d_publicKey = VerifyingKey.from_string(d_publ)
+	x = d_publicKey.verify(d_sign, plainText.encode())
+	print(x)
+
 
 
 
@@ -188,6 +200,14 @@ def gettxid():
 	with open('mempool.txt') as file:
 		x+=1
 	return x
+
+if(s==4):
+	print('Enter parameters')
+	print('txid')
+	txid = input()
+	print('output index')
+	outputIndex = input()
+	make_inp(txid, outputIndex);
 
 if(s==0):
 	print(hashlib.sha256(public_key.to_string()).hexdigest())
