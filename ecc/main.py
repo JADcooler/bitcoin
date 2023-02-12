@@ -95,7 +95,7 @@ def make_inp(prev_tran, output_index):
 	input['sequence'] = '0xFFFFFFFF' #it's a value ignored by bitcoin
 	#signature script
 	plainText = str(prev_tran) + str(output_index)
-	#TODO
+
 	cipherText = private_key.sign(plainText.encode()) #string to byte
 	signature = cipherText.decode('ISO-8859-1') #byte to string
 	pkString = public_key.to_string().decode('ISO-8859-1')
