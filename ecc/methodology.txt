@@ -1,0 +1,16 @@
+
+// identify UTXOs
+
+-> UTXOs() #gives txid and output index
+
+// choose amount and receiver pubkey
+
+-> #method that takes required UTXOs and returns needed ones
+   
+-> make_inp()
+
+// transaction is now made, we broadcast
+
+-> #[MAIN_F] method that takes transaction, enters to mempool 
+
+-> lets see mining later
