@@ -28,9 +28,10 @@ print('2.check balance\n')
 print('3. mine current block\n')
 print('4. TEST\n')
 print('9. neededUTXO\n')
+print('10. Pay\n')
 s= int(input())
 
-publickey_hash = hashlib.sha256(public_key.to_string()).hexdigest()
+pubkeyhash = hashlib.sha256(public_key.to_string()).hexdigest()
 
 
 def neededUTXO(amount):
@@ -50,11 +51,31 @@ def neededUTXO(amount):
 			break
 	return rList
 
+def hash_tr(tr):
+	hash_lvl1 = hashlib.sha256(str(tr).encode()).hexdigest()
+	double_hash = hashlib.sha256(hash_lvl1.encode()).hexdigest()
+	txid = double_hash
+	return txid
 
 
-def pay(amount, recv):
+
+def pay(amount, recv, fees):
 	utxos = neededUTXO(amount)
-	
+	inputs = []
+	available = 0
+	for i in utxos:
+		available += i[2]
+		inputs.append(make_inp(i[0],i[1]))
+	outputs = make_out(available, amount, recv, fees)
+	return make_transaction(inputs, outputs)
+	#After payment gotta update utxo list
+	#TODO
+
+def make_out(available, amount, recv, fees):
+	output1={'output_no': 0, 'amount':amount, 'pubkey_scr':recv, 'locktime': 1 }
+	payToSelf = int(available) - int(amount) - fees
+	output2={'output_no': 1, 'amount':payToSelf,'pubkey_scr': pubkeyhash, 'locktime':1}
+	return [output1,output2]
 
 def make_transaction(inputs, outputs):
 	transaction = {}
@@ -109,13 +130,13 @@ def make_transaction(inputs, outputs):
 def make_inp(prev_tran, output_index):
 	input = {}
 	#needs 4 things
-	#prev_tran
+	#prev_tran - 1
 	input['prev_tran'] = prev_tran
-	#output_index
+	#output_index - 2
 	input['output_index'] = output_index
-	#sequence
+	#sequence - 3
 	input['sequence'] = '0xFFFFFFFF' #it's a value ignored by bitcoin
-	#signature script
+	#signature script START
 	plainText = str(prev_tran) + str(output_index)
 
 	cipherText = private_key.sign(plainText.encode()) #string to byte
@@ -128,7 +149,8 @@ def make_inp(prev_tran, output_index):
 	d_publicKey = VerifyingKey.from_string(d_publ)
 	x = d_publicKey.verify(d_sign, plainText.encode())
 	print(x)
-
+	#signature script END - 4
+	input['sigScr'] = sigScr
 	return input
 	#YAY
 
@@ -339,5 +361,12 @@ if(s==9):
 	x = input('Enter amount ')
 	x = neededUTXO(x)
 	print(x)
+
+if(s==10):
+	x=input('amount ')
+	y=input('receiver ')
+	z=pay(x,y, 3)
+	print('starts here')
+	print(str(z))
 #end
 

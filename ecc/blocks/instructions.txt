@@ -1,0 +1,2 @@
+dont touch block0
+its the genesis one

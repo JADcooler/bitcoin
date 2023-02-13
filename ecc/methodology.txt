@@ -9,6 +9,8 @@
    
 -> make_inp()
 
+-> pay(amount, to)
+
 // transaction is now made, we broadcast
 
 -> #[MAIN_F] method that takes transaction, enters to mempool 
