@@ -5,7 +5,7 @@
 
 // choose amount and receiver pubkey
 
--> #method that takes required UTXOs and returns needed ones
+-> neededUTXO(amount)
    
 -> make_inp()
 

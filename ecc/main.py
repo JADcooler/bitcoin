@@ -52,6 +52,10 @@ def neededUTXO(amount):
 
 
 
+def pay(amount, recv):
+	utxos = neededUTXO(amount)
+	
+
 def make_transaction(inputs, outputs):
 	transaction = {}
 	transaction['version']=1.0
