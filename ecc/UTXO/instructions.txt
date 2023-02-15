@@ -1,0 +1,20 @@
+So,
+This is the UTXO set which is used to find the unspent transactions 
+in blocks.
+
+as transactions are spent, using txids, txs are removed from the 
+blocks.
+
+its not possible to know which tx is from which block, so we 
+iteratively check EVERY block.
+
+The structure is similar to balances.txt in usr_cache but we 
+store the entire transactions in that block.
+
+so, { blockn : str(tx in blockn), ..}
+stored as a whole as string
+
+so one decode for whole thing.
+
+then another decode for the str(tx in blockn) part
+
