@@ -18,8 +18,21 @@
 // we listen to transaction
 // then we update available UTXOs by removing ones we used as inp
 
+// so.. I'm removing an UTXO after entering it to mempool
+// then I get a block that has already added the tx.
 
--> #[MAIN_F] method that takes transaction, enters to mempool 
+
+// I have to add a mechanism to make permanent changes to
+// UTXO.txt only after block is added.
+
+-> UTXO.tmp
+
+// when there's a block received. we deleteUTXO() in UTXO.txt
+// if some input doesn't exist, we reject block
+
+
+// in script, we can choose arbitrary time to start mining.
+// mining is done with current mempool.txt txs.
 
 
 -> //mempool is limited in size, how many characters can I send?

@@ -10,6 +10,9 @@ def hash_tr(tr):
         txid = double_hash
         return txid
 
+def deleteUTXO(tr):
+	#TODO
+
 
 while(1):
 
@@ -40,6 +43,8 @@ while(1):
 
 		with open('mempool.txt', 'w') as f:
 			f.write(str(mempool))
+
+
 		#with open('mempool.txt',mode='a+') as file:
 		#	file.write(str(trans)+'\n')
 

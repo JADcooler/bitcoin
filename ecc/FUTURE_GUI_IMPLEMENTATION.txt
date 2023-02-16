@@ -1,0 +1,13 @@
+yes, check python multi processing.
+Or multi threading (you have to customize the other script and import it in the main script to make it run from the parent script).
+
+Or you can also do this:
+
+    import os 
+     
+    filenames = [name for i in os.listdir(os.getcwd()) if i.endswith('.py')] 
+    for file in filenames: 
+	os.system(f"python3 {file}") 
+
+this will launch all your python files in the same
+ directory as this script!
