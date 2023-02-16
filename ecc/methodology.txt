@@ -21,14 +21,9 @@
 
 -> #[MAIN_F] method that takes transaction, enters to mempool 
 
--> lets see mining later
- 
-// okay, first we have x number of transactions in mempool
-// we pick first n, (n<x) by sorting by fees descending ah
-// the n is packed into a block, rest is left for next block
-// how are the 6 confirmations made? can someone fake it
-// after leaking the nonce?
-// If I put like an arbitrary number of transactions in it
-// whats the chance it'll get accepted?
+
+-> //mempool is limited in size, how many characters can I send?
+   //tr tr ah we can send instead of in bulk. in case some
+   //new node requests it.
 
 

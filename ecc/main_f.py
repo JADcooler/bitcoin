@@ -18,15 +18,28 @@ while(1):
 	x=m[0].decode()
 	print(x)
 
-	if(x=='transaction'):
-		print('	-> processing transaction \'', end ='' )
+	if(x=='transaction'): #Start strings
 		m=s.recvfrom(1024)[0]
-		h = hash_tr(m.decode())
-		print(h,'\'')
+		txid = hash_tr(m.decode())
+
+		print('	-> processing transaction \'', end ='' )
+		print(txid,'\'') #print txid
+
+
 		print(m)
-		print(type(m))
-		trans = ast.literal_eval(m.decode()) #bytes to string
-		print(type(trans))
+		print("\n\n\n")
+
+		with open('mempool.txt', 'r') as f:
+			x = f.read()
+
+		mempool = ast.literal_eval(x)
+
+		print("MEMPOOL IS ", mempool)
+
+		mempool[txid] = m.decode()
+
+		with open('mempool.txt', 'w') as f:
+			f.write(str(mempool))
 		#with open('mempool.txt',mode='a+') as file:
 		#	file.write(str(trans)+'\n')
 
