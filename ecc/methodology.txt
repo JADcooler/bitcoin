@@ -16,7 +16,31 @@
 -> broadcast(tr)
 
 // we listen to transaction
+
+-> we check its signature, reject if invalid  
+
 // then we update available UTXOs by removing ones we used as inp
+// we update utxo.tmp if transaction. UTXOs.txt if block
+
+// we use UTXO.tmp as balance in main.py
+
+-> start mining (miner.py)
+
+// in script, we can choose arbitrary time to start mining.
+// mining is done with current mempool.txt txs.
+
+-> add coinbase, with sum of fees, and current block reward
+
+-> mine with bruteforcing nonce, if ok send block data with coinbase
+
+-> //mempool is limited in size, how many characters can I send?
+   //tr tr ah we can send instead of in bulk. in case some
+   //new node requests it.
+
+
+----------------------------------------------------------------
+
+intermediary steps/plans
 
 // so.. I'm removing an UTXO after entering it to mempool
 // then I get a block that has already added the tx.
@@ -29,14 +53,4 @@
 
 // when there's a block received. we deleteUTXO() in UTXO.txt
 // if some input doesn't exist, we reject block
-
-
-// in script, we can choose arbitrary time to start mining.
-// mining is done with current mempool.txt txs.
-
-
--> //mempool is limited in size, how many characters can I send?
-   //tr tr ah we can send instead of in bulk. in case some
-   //new node requests it.
-
 

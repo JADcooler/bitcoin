@@ -34,9 +34,6 @@ def deleteUTXO(tr, blockReceived):
 			f.write(str(UTXO)) #to str of blocks
 
 
-ip = input('tr ')
-deleteUTXO(ip, False)
-
 
 while(1):
 
@@ -56,6 +53,8 @@ while(1):
 		print(m)
 		print("\n\n\n")
 
+		tr = ast.literal_eval(m.decode())
+		#TODO add way to verify sigscript of inputs
 		with open('mempool.txt', 'r') as f:
 			x = f.read()
 

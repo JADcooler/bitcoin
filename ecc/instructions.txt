@@ -1,0 +1,5 @@
+mempool.txt
+-----------
+
+so, we just store a dictionary of {txid : str(txn)}
+
