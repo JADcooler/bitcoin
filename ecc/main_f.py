@@ -10,8 +10,32 @@ def hash_tr(tr):
         txid = double_hash
         return txid
 
-def deleteUTXO(tr):
-	#TODO
+def deleteUTXO(tr, blockReceived):
+	file = 'UTXO/UTXOs.txt'
+	if(blockReceived == False):
+		file = 'UTXO/UTXO.tmp'
+
+	with open(file, 'r') as f:
+		UTXO = f.read()
+	UTXO = ast.literal_eval(UTXO) #get dict of blocks
+	for block in UTXO: #Iterate over all blocks
+		txs = UTXO[block]
+		txs = ast.literal_eval(txs) #get dict of tx in block
+		try:
+			print('before',txs) 
+			del txs[tr]
+
+		except KeyError:
+			print('transaction wasn\'t found'+str(block))
+			continue
+		print('after',txs)
+		UTXO[block] = str(txs) #to str of tx
+		with open(file, 'w') as f:
+			f.write(str(UTXO)) #to str of blocks
+
+
+ip = input('tr ')
+deleteUTXO(ip, False)
 
 
 while(1):
