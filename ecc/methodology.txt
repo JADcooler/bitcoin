@@ -16,11 +16,16 @@
 -> broadcast(tr)
 
 // we listen to transaction
+// [ISSUE] sometimes tx length exceeds, is it ok to inc recFrom?
 
 -> we check its signature, reject if invalid  
+// we decrypt the signature, we check prev txn , output index.
+// we use that amount, to check if outputs <= input
 
 // then we update available UTXOs by removing ones we used as inp
 // we update utxo.tmp if transaction. UTXOs.txt if block
+// if UTXO isn't available, we reject.
+
 
 // we use UTXO.tmp as balance in main.py
 

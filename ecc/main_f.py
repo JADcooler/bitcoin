@@ -1,6 +1,8 @@
 from socket import *
 import ast
 import hashlib
+from ecdsa import BadSignatureError, VerifyingKey
+
 s=socket(AF_INET, SOCK_DGRAM)
 s.bind(('',12345))
 
@@ -9,6 +11,27 @@ def hash_tr(tr):
         double_hash = hashlib.sha256(hash_lvl1.encode()).hexdigest()
         txid = double_hash
         return txid
+
+def verifySignature(tr):
+	print('splitting inputs')
+	for inp in tr['inputs']:
+		prev_tran = inp['prev_tran']
+		output_index = inp['output_index']
+		sigScr = inp['sigScr']
+
+		textToGet = prev_tran + str(output_index)
+
+		pubkey = sigScr['publicKey']
+		signature = sigScr['signature']
+
+		dPub = VerifyingKey.from_string(pubkey.encode('ISO-8859-1'))
+		dSig = signature.encode('ISO-8859-1')
+
+		x = dPub.verify(dSig, textToGet.encode('ISO-8859-1'))
+		print("THE RESULT IS ",x)
+
+
+
 
 def deleteUTXO(tr, blockReceived):
 	file = 'UTXO/UTXOs.txt'
@@ -22,7 +45,7 @@ def deleteUTXO(tr, blockReceived):
 		txs = UTXO[block]
 		txs = ast.literal_eval(txs) #get dict of tx in block
 		try:
-			print('before',txs) 
+			print('before',txs)
 			del txs[tr]
 
 		except KeyError:
@@ -55,6 +78,10 @@ while(1):
 
 		tr = ast.literal_eval(m.decode())
 		#TODO add way to verify sigscript of inputs
+
+		verifySignature(tr)
+
+
 		with open('mempool.txt', 'r') as f:
 			x = f.read()
 
