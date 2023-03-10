@@ -66,7 +66,7 @@ while(1):
 	print(x)
 
 	if(x=='transaction'): #Start strings
-		m=s.recvfrom(1024)[0]
+		m=s.recvfrom(2048)[0] #hope 2048 is ok..
 		txid = hash_tr(m.decode())
 
 		print('	-> processing transaction \'', end ='' )
@@ -87,12 +87,13 @@ while(1):
 
 		mempool = ast.literal_eval(x)
 
-		print("MEMPOOL IS ", mempool)
+		#print("MEMPOOL IS ", mempool)
 
 		mempool[txid] = m.decode()
 
 		with open('mempool.txt', 'w') as f:
 			f.write(str(mempool))
+		print('WRITTEN IN MEMPOOL')
 
 
 		#with open('mempool.txt',mode='a+') as file:

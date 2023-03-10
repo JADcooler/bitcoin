@@ -2,7 +2,7 @@
 // identify UTXOs
 
 -> UTXOs() #gives txid and output index
-
+## IMPLEMENTAION FOR ARBITRARY BLOCK - INPROGRESS - ONHOLD	
 // choose amount and receiver pubkey
 
 -> neededUTXO(amount)
@@ -17,10 +17,15 @@
 
 // we listen to transaction
 // [ISSUE] sometimes tx length exceeds, is it ok to inc recFrom?
+## TESTING RECVFROM 2048 IN ACTUAL LAN -- ONHOLD
 
 -> we check its signature, reject if invalid  
 // we decrypt the signature, we check prev txn , output index.
 // we use that amount, to check if outputs <= input
+## TESTING FOR MULTIPLE VERIFY SIGNATURE -- DONE
+
+## TESTING FOR ACTUAL TRANSACTION DATA IN MEMPOOL/ BLOCK -- INPROGRESS
+
 
 // then we update available UTXOs by removing ones we used as inp
 // we update utxo.tmp if transaction. UTXOs.txt if block

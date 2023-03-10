@@ -180,6 +180,8 @@ transactions_recv= []
 
 latest_block = 'block0.txt'
 
+
+#TODO identify UTXOs in latest block, can be parameterized tp 
 def UTXOs():
 	with open('usr_cache/balances.txt', mode='r') as f:
 		dict_str = f.read()
@@ -192,10 +194,14 @@ def UTXOs():
 		#print(transactions_recv)
 		return balances[latest_block]
 
+	#read block file
 	with open('blocks/'+latest_block, mode='r') as f:
 		block_str = f.read()
 	block = ast.literal_eval(block_str)
+
+
 	for item in block.items():
+		#item is of format -> txid, txStr
 		tr_data = ast.literal_eval(item[1])
 		outputs = tr_data['outputs']
 		for output in outputs:
