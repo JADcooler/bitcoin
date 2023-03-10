@@ -25,7 +25,7 @@
 ## TESTING FOR MULTIPLE VERIFY SIGNATURE -- DONE
 
 ## TESTING FOR ACTUAL TRANSACTION DATA IN MEMPOOL/ BLOCK -- INPROGRESS
-
+## by verifying if input referenced exists in UTXO set
 
 // then we update available UTXOs by removing ones we used as inp
 // we update utxo.tmp if transaction. UTXOs.txt if block

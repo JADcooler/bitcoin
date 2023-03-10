@@ -30,6 +30,13 @@ def verifySignature(tr):
 		x = dPub.verify(dSig, textToGet.encode('ISO-8859-1'))
 		print("THE RESULT IS ",x)
 
+	print("THIS SAYS THE PERSON WHO GAVE THE SIGNATURE WITH PUBLIC KEY, HAD ACTUALLY",
+		"USED HIS PRIVATE KEY TO ENCRYPT PREV_TXID AND OUTPUT INDEX")
+	print("THIS IS USED SUCH THAT ONLY THE PERSON IN POSSESSION OF THE PRIVATE KEY",
+		"FOR THAT PUBLIC KEY CAN USE HIS FUNDS")
+	print("---------------------------------------------------------------------------------")
+
+	print("THE REST WE HAVE TO DO IS VERIFY THAT THE INPUT REFERENCED EXISTS IN UTXO SET")
 
 
 
