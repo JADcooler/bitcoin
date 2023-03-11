@@ -1,0 +1,22 @@
+lets take the case where we see a transaction in the mempool.
+
+so, the right thing to do is delete the inputs of the transaction from
+our UTXO set.
+
+what if the mempool we currently have, is told to be discarded 
+once a miner mines a block?
+
+we would have to revert all changes we did to the UTXO set because 
+of the mempool we once had.
+
+Then delete every referenced input from the block in the UTXO set.
+
+----------------------------------------------------------------
+
+what we can do is have all changes from mempool be dones in UTXO.tmp
+
+Then when this particular node finds the block hash by adjusting nonce
+
+it can transmit it from main_z and we pick it up from main_f and 
+
+process it.

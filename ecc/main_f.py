@@ -36,7 +36,10 @@ def verifySignature(tr):
 		"FOR THAT PUBLIC KEY CAN USE HIS FUNDS")
 	print("---------------------------------------------------------------------------------")
 
-	print("THE REST WE HAVE TO DO IS VERIFY THAT THE INPUT REFERENCED EXISTS IN UTXO SET")
+	print("THE REST WE HAVE TO DO IS VERIFY THAT THE INPUT REFERENCED EXISTS IN UTXO SET",
+		"AND IS PAID TO TO HIM AND NOT OTHERS")
+
+
 
 
 
@@ -63,7 +66,7 @@ def deleteUTXO(tr, blockReceived):
 		with open(file, 'w') as f:
 			f.write(str(UTXO)) #to str of blocks
 
-
+	print("DELETED INPUT")
 
 while(1):
 
@@ -84,10 +87,10 @@ while(1):
 		print("\n\n\n")
 
 		tr = ast.literal_eval(m.decode())
-		#TODO add way to verify sigscript of inputs
+
 
 		verifySignature(tr)
-
+		#TODO del inputs from UTXO set / UTXO.tmp
 
 		with open('mempool.txt', 'r') as f:
 			x = f.read()
