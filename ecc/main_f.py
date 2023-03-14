@@ -14,6 +14,7 @@ def hash_tr(tr):
 
 def verifySignature(tr):
 	print('splitting inputs')
+	flag = 1
 	for inp in tr['inputs']:
 		prev_tran = inp['prev_tran']
 		output_index = inp['output_index']
@@ -28,17 +29,16 @@ def verifySignature(tr):
 		dSig = signature.encode('ISO-8859-1')
 
 		x = dPub.verify(dSig, textToGet.encode('ISO-8859-1'))
-		print("THE RESULT IS ",x)
+		print("\t\tTHE RESULT IS ",x)
+		if(x == False):
+			flag=0
 
-	print("THIS SAYS THE PERSON WHO GAVE THE SIGNATURE WITH PUBLIC KEY, HAD ACTUALLY",
-		"USED HIS PRIVATE KEY TO ENCRYPT PREV_TXID AND OUTPUT INDEX")
-	print("THIS IS USED SUCH THAT ONLY THE PERSON IN POSSESSION OF THE PRIVATE KEY",
-		"FOR THAT PUBLIC KEY CAN USE HIS FUNDS")
+	print("THIS SAYS THE PERSON WHO GAVE THE SIGNATURE WITH PUBLIC KEY, HAD ACTUALLY", "USED HIS PRIVATE KEY TO ENCRYPT PREV_TXID AND OUTPUT INDEX")
+	print("THIS IS USED SUCH THAT ONLY THE PERSON IN POSSESSION OF THE PRIVATE KEY", "FOR THAT PUBLIC KEY CAN USE HIS FUNDS")
 	print("---------------------------------------------------------------------------------")
+	print("THE REST WE HAVE TO DO IS VERIFY THAT THE INPUT REFERENCED EXISTS IN UTXO SET", 	"AND IS PAID TO TO HIM AND NOT OTHERS")
 
-	print("THE REST WE HAVE TO DO IS VERIFY THAT THE INPUT REFERENCED EXISTS IN UTXO SET",
-		"AND IS PAID TO TO HIM AND NOT OTHERS")
-
+	return flag
 
 
 
@@ -56,7 +56,7 @@ def deleteUTXO(tr, blockReceived):
 		txs = ast.literal_eval(txs) #get dict of tx in block
 		try:
 			print('before',txs)
-			del txs[tr]
+			del txs[hash_tr(tr)]
 
 		except KeyError:
 			print('transaction wasn\'t found'+str(block))
@@ -67,6 +67,53 @@ def deleteUTXO(tr, blockReceived):
 			f.write(str(UTXO)) #to str of blocks
 
 	print("DELETED INPUT")
+
+def validateAsUTXO(tr):
+	file = 'UTXO/UTXO.tmp'
+	#For a transaction to be validated, all its inputs must
+	#exist either in a block or in the mempool.
+
+	a = verifySignature(tr)
+	if(a==False):
+		print("INVALID SIGNATURE")
+		return False
+
+	txid = hash_tr(tr)
+
+	file = 'UTXO/UTXO.tmp'
+
+	with open(file, 'r') as f:
+		UTXO = f.read()
+	UTXO = ast.literal_eval(UTXO) #get dict of blocks
+
+	inputTxids = [ i['prev_tran'] for i in tr['inputs'] ]
+
+
+	print("Input prev_trans ", inputTxids)
+
+
+
+	for block in UTXO: #Iterate over all blocks
+		txs = UTXO[block]
+		txs = ast.literal_eval(txs) #get dict of tx in block
+		txids = txs.keys()
+
+		print('searching ',inputTxids, ' in ',txids)
+
+		flag = 0
+		for i in inputTxids:
+			if i in txids:
+				inputTxids.remove(i)
+				flag = 1
+		#the above approach is wrong as each prev_tran
+		#can be duplicated while output no changes
+
+		#an approach where we account output no TODO
+		if(not flag):
+			print("not found in ",block)
+		print(inputTxids)
+
+	return not len(inputTxids)
 
 while(1):
 
@@ -101,6 +148,10 @@ while(1):
 
 		mempool[txid] = m.decode()
 
+		if(validateAsUTXO(tr) == False):
+			print("INVALID TRANSACTION, REJECTED")
+			continue
+
 		with open('mempool.txt', 'w') as f:
 			f.write(str(mempool))
 		print('WRITTEN IN MEMPOOL')
@@ -110,6 +161,5 @@ while(1):
 		#	file.write(str(trans)+'\n')
 
 #END
-
 
 

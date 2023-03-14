@@ -1,0 +1,2 @@
+mempool has txid : str(txin)
+
