@@ -90,9 +90,31 @@ def validateAsUTXO(tr):
 
 
 	print("Input prev_trans ", inputTxids)
+	#approach to combine all transactions with o/p in UTXO and check if
+	#set prev tran is subset of all txids in UTXO
+	allTxids = {}
+	#TODO append output no in tnxs and compare 
+	for block in UTXO:
+		tnxs = ast.literal_eval(UTXO[block])
+		for tnx in tnxs:
+			allTxids[tnx] = tnxs[tnx]
 
+	print("all txids in UTXO ")
 
+	for i in allTxids:
+		print(i)
 
+	print('all prev trans')
+	for i in inputTxids:
+		print(i)
+
+	bool = set(inputTxids.keys()).issubset(set(allTxids.keys()))
+	print("they are equal? ",bool)
+
+	#then check if the prev tran existing in UTXO sets
+	#has output to the current tx owners public key
+
+	'''
 	for block in UTXO: #Iterate over all blocks
 		txs = UTXO[block]
 		txs = ast.literal_eval(txs) #get dict of tx in block
@@ -114,7 +136,7 @@ def validateAsUTXO(tr):
 		print(inputTxids)
 
 	return not len(inputTxids)
-
+	'''
 while(1):
 
 	print('waiting..')
