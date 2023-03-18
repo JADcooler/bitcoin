@@ -87,7 +87,7 @@ def deleteTxOutputs(txid, on):
 			break
 	if(blockF == ''):
 		print("NO BLOCK HAS REQUIRED TX")
-		return
+		return False
 
 	txns = ast.literal_eval(blocks[blockF])
 	txn = ast.literal_eval(txns[txid])
@@ -100,7 +100,7 @@ def deleteTxOutputs(txid, on):
 			break
 	if(toPop == -1):
 		print("TXN DOES NOT HAVE REQUIRED OUTPUT INDEX")
-
+		return False
 	#we are now about to modify txns string in block dict
 
 
@@ -118,7 +118,17 @@ def deleteTxOutputs(txid, on):
 		f.write(str(blocks))
 
 	print("SUCCESFULLY REMOVED OUTPUT",on," FROM",txid)
+	return True
 
+
+def handleError(args):
+	if(args[0]  == (-1,-1)):
+		print("[FATAL ERROR] INVALID OUTPUT INDEX REFERENCED, DOESN'T EXIST OR HAS BEEN USED \n\n")
+		return False
+	elif(args[0] == (-1,-2)):
+		print("[FATAL ERROR] INPUT TXN AND OUTPUT INDEX DON'T EXIST IN UTXO SET")
+		return False
+	return True
 
 
 def validateAsUTXO(tr):
@@ -127,8 +137,8 @@ def validateAsUTXO(tr):
 	#exist either in a block or in the mempool.
 
 	pk = tr['inputs'][0]['sigScr']['publicKey']
-
-
+	pk = VerifyingKey.from_string(pk.encode('ISO-8859-1'))
+	pk = hashlib.sha256(pk.to_string()).hexdigest()
 
 	a = verifySignature(tr)
 	if(a==False):
@@ -147,16 +157,26 @@ def validateAsUTXO(tr):
 	#checking if all inputs reference the public key of tx maker
 	print("	\#checking if all inputs reference the public key of tx maker")
 
-	inputx = [ i['prev_tran'] for i in tr['inputs'] ]
-	inputOn = [ i['output_index'] for i in tr['inputs'] ]
-	inputT = {}
+	inputx = [ (i['prev_tran'], i['output_index']) for i in tr['inputs'] ]
 
+	result = True
 	for block in UTXO:
 		txns = ast.literal_eval(UTXO[block])
 		for i in inputx:
-			if i in txns:
-				inputT[i] = ast.literal_eval(txns[i])
+			if i[0] in txns: #i[0] is txid
+				txn = ast.literal_eval(txns[i[0]])
+				print(i[1], len(txn['outputs']), txn)
+				b = 0
+				try:
+					b = txn['outputs'][i[1]]['pubkey_scr']
+				except IndexError as e:
+					print("Referenced output index doesn't exist",e)
+				result*= (b == pk)
 
+	if(result == False):
+		print("NOT ALL INPUTS USED REFERENCE TX SIGNER ")
+		return [(-1,-1)] #code (-1,-1) for invalid output index
+	#____________________________________________
 
 	inputTxids = [ i['prev_tran']+ str(i['output_index'])   for i in tr['inputs'] ]
 
@@ -184,6 +204,8 @@ def validateAsUTXO(tr):
 
 	bool = set(inputTxids).issubset(set(allTxids.keys()))
 	print("they are equal? ",bool)
+	if(not bool):
+		return [(-1,-2)]
 
 	return [ (i['prev_tran'], i['output_index']) for i in tr['inputs'] ]
 
@@ -212,11 +234,21 @@ while(1):
 		params = validateAsUTXO(tr)
 		print("params are ",params)
 
+		cont = handleError(params)
+
+		if(not cont):
+			continue
+
 		#TODO del inputs from UTXO set / UTXO.tmp
 
+		flag = 1
 		for i in params:
-			deleteTxOutputs(i[0], i[1])
-
+			bool = deleteTxOutputs(i[0], i[1])
+			if(not bool):
+				print("DELETE TX FAILED for (txid, on) ",i)
+				flag = 0
+		if(not flag):
+			continue
 
 		with open('mempool.txt', 'r') as f:
 			x = f.read()
