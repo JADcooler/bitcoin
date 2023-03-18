@@ -24,8 +24,10 @@
 // we use that amount, to check if outputs <= input
 ## TESTING FOR MULTIPLE VERIFY SIGNATURE -- DONE
 
-## TESTING FOR ACTUAL TRANSACTION DATA IN MEMPOOL/ BLOCK -- INPROGRESS
+## TESTING FOR ACTUAL TRANSACTION DATA IN MEMPOOL/ BLOCK -- DONE
 ## by verifying if input referenced exists in UTXO set
+
+## REMOVE REFFERENCED PREV TRAN OUTPUT IF VALID FROM UTXO -- IN PROGRESS
 // then we update available UTXOs by removing ones we used as inp
 // we update utxo.tmp if transaction. UTXOs.txt if block
 // if UTXO isn't available, we reject.

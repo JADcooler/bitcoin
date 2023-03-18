@@ -115,7 +115,7 @@ def make_transaction(inputs, outputs):
 
 	#outputs
 	#list of outputs
-	transaction['outputs'] = outputs 
+	transaction['outputs'] = outputs
 
 	'''
 	output={'output_no': 0, 'amount':100, 'pubkey_scr':recv_scr, 'locktime': transaction['sequence'] }

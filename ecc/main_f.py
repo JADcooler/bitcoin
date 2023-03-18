@@ -13,7 +13,8 @@ def hash_tr(tr):
         return txid
 
 def verifySignature(tr):
-	print('splitting inputs')
+	print('splitting inputs of txid',hash_tr(tr))
+
 	flag = 1
 	for inp in tr['inputs']:
 		prev_tran = inp['prev_tran']
@@ -68,10 +69,66 @@ def deleteUTXO(tr, blockReceived):
 
 	print("DELETED INPUT")
 
+def deleteTxOutputs(txid, on):
+	file = 'UTXO/UTXO.tmp'
+	#by giving a txn, we remove an output from it as UTXO
+
+	print("DELETING ",txid, " OUTPUT ", on)
+
+	with open(file, 'r') as f:
+		blocks = ast.literal_eval(f.read())
+
+	blockF = ''
+	for block in blocks:
+		txns = blocks[block]
+		txns = ast.literal_eval(txns)
+		if( txid in txns):
+			blockF = block
+			break
+	if(blockF == ''):
+		print("NO BLOCK HAS REQUIRED TX")
+		return
+
+	txns = ast.literal_eval(blocks[blockF])
+	txn = ast.literal_eval(txns[txid])
+
+	toPop = -1
+	outputs = txn['outputs']
+	for i in range(len(outputs)):
+		if(outputs[i]['output_no']==on):
+			toPop = i
+			break
+	if(toPop == -1):
+		print("TXN DOES NOT HAVE REQUIRED OUTPUT INDEX")
+
+	#we are now about to modify txns string in block dict
+
+
+	modifyThis = blocks[blockF] #later used as l value
+	modifyTxns = ast.literal_eval(modifyThis) #later as l value
+	modifyTxn =ast.literal_eval( modifyTxns[txid]) #later uesd as l value
+
+
+	modifyTxn['outputs'].pop(toPop)
+
+	modifyTxns[txid] = str(modifyTxn)
+	blocks[blockF] = str(modifyTxns)
+
+	with open(file, 'w') as f:
+		f.write(str(blocks))
+
+	print("SUCCESFULLY REMOVED OUTPUT",on," FROM",txid)
+
+
+
 def validateAsUTXO(tr):
 	file = 'UTXO/UTXO.tmp'
 	#For a transaction to be validated, all its inputs must
 	#exist either in a block or in the mempool.
+
+	pk = tr['inputs'][0]['sigScr']['publicKey']
+
+
 
 	a = verifySignature(tr)
 	if(a==False):
@@ -86,18 +143,35 @@ def validateAsUTXO(tr):
 		UTXO = f.read()
 	UTXO = ast.literal_eval(UTXO) #get dict of blocks
 
-	inputTxids = [ i['prev_tran'] for i in tr['inputs'] ]
+
+	#checking if all inputs reference the public key of tx maker
+	print("	\#checking if all inputs reference the public key of tx maker")
+
+	inputx = [ i['prev_tran'] for i in tr['inputs'] ]
+	inputOn = [ i['output_index'] for i in tr['inputs'] ]
+	inputT = {}
+
+	for block in UTXO:
+		txns = ast.literal_eval(UTXO[block])
+		for i in inputx:
+			if i in txns:
+				inputT[i] = ast.literal_eval(txns[i])
+
+
+	inputTxids = [ i['prev_tran']+ str(i['output_index'])   for i in tr['inputs'] ]
 
 
 	print("Input prev_trans ", inputTxids)
 	#approach to combine all transactions with o/p in UTXO and check if
 	#set prev tran is subset of all txids in UTXO
 	allTxids = {}
-	#TODO append output no in tnxs and compare 
-	for block in UTXO:
+	for block in UTXO: #UTXO is of format { 'blockno': str(txns) }
 		tnxs = ast.literal_eval(UTXO[block])
-		for tnx in tnxs:
-			allTxids[tnx] = tnxs[tnx]
+		for tnx in tnxs: #tnxs is of format { 'txid' : str(tx data) }
+			x = tnxs[tnx]
+			x = ast.literal_eval(x)
+			for output in x['outputs']:
+				allTxids[tnx + str(output['output_no'])] = x['outputs']
 
 	print("all txids in UTXO ")
 
@@ -108,35 +182,12 @@ def validateAsUTXO(tr):
 	for i in inputTxids:
 		print(i)
 
-	bool = set(inputTxids.keys()).issubset(set(allTxids.keys()))
+	bool = set(inputTxids).issubset(set(allTxids.keys()))
 	print("they are equal? ",bool)
 
-	#then check if the prev tran existing in UTXO sets
-	#has output to the current tx owners public key
+	return [ (i['prev_tran'], i['output_index']) for i in tr['inputs'] ]
 
-	'''
-	for block in UTXO: #Iterate over all blocks
-		txs = UTXO[block]
-		txs = ast.literal_eval(txs) #get dict of tx in block
-		txids = txs.keys()
 
-		print('searching ',inputTxids, ' in ',txids)
-
-		flag = 0
-		for i in inputTxids:
-			if i in txids:
-				inputTxids.remove(i)
-				flag = 1
-		#the above approach is wrong as each prev_tran
-		#can be duplicated while output no changes
-
-		#an approach where we account output no TODO
-		if(not flag):
-			print("not found in ",block)
-		print(inputTxids)
-
-	return not len(inputTxids)
-	'''
 while(1):
 
 	print('waiting..')
@@ -158,8 +209,14 @@ while(1):
 		tr = ast.literal_eval(m.decode())
 
 
-		verifySignature(tr)
+		params = validateAsUTXO(tr)
+		print("params are ",params)
+
 		#TODO del inputs from UTXO set / UTXO.tmp
+
+		for i in params:
+			deleteTxOutputs(i[0], i[1])
+
 
 		with open('mempool.txt', 'r') as f:
 			x = f.read()
@@ -169,11 +226,6 @@ while(1):
 		#print("MEMPOOL IS ", mempool)
 
 		mempool[txid] = m.decode()
-
-		if(validateAsUTXO(tr) == False):
-			print("INVALID TRANSACTION, REJECTED")
-			continue
-
 		with open('mempool.txt', 'w') as f:
 			f.write(str(mempool))
 		print('WRITTEN IN MEMPOOL')
