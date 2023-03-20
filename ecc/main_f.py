@@ -42,33 +42,6 @@ def verifySignature(tr):
 	return flag
 
 
-
-
-def deleteUTXO(tr, blockReceived):
-	file = 'UTXO/UTXOs.txt'
-	if(blockReceived == False):
-		file = 'UTXO/UTXO.tmp'
-
-	with open(file, 'r') as f:
-		UTXO = f.read()
-	UTXO = ast.literal_eval(UTXO) #get dict of blocks
-	for block in UTXO: #Iterate over all blocks
-		txs = UTXO[block]
-		txs = ast.literal_eval(txs) #get dict of tx in block
-		try:
-			print('before',txs)
-			del txs[hash_tr(tr)]
-
-		except KeyError:
-			print('transaction wasn\'t found'+str(block))
-			continue
-		print('after',txs)
-		UTXO[block] = str(txs) #to str of tx
-		with open(file, 'w') as f:
-			f.write(str(UTXO)) #to str of blocks
-
-	print("DELETED INPUT")
-
 def deleteTxOutputs(txid, on):
 	file = 'UTXO/UTXO.tmp'
 	#by giving a txn, we remove an output from it as UTXO
@@ -95,7 +68,7 @@ def deleteTxOutputs(txid, on):
 	toPop = -1
 	outputs = txn['outputs']
 	for i in range(len(outputs)):
-		if(outputs[i]['output_no']==on):
+		if(outputs[i] is not None and outputs[i]['output_no']==on):
 			toPop = i
 			break
 	if(toPop == -1):
@@ -109,7 +82,7 @@ def deleteTxOutputs(txid, on):
 	modifyTxn =ast.literal_eval( modifyTxns[txid]) #later uesd as l value
 
 
-	modifyTxn['outputs'].pop(toPop)
+	modifyTxn['outputs'][toPop] = None
 
 	modifyTxns[txid] = str(modifyTxn)
 	blocks[blockF] = str(modifyTxns)
@@ -171,7 +144,12 @@ def validateAsUTXO(tr):
 					b = txn['outputs'][i[1]]['pubkey_scr']
 				except IndexError as e:
 					print("Referenced output index doesn't exist",e)
+				except Exception as e:
+					print("UNEXPECTED EXCEPTION ",e)
+				#we expect main.py to send valid output no
+				#so, the last exception would catch if it's None
 				result*= (b == pk)
+
 
 	if(result == False):
 		print("NOT ALL INPUTS USED REFERENCE TX SIGNER ")
@@ -191,12 +169,18 @@ def validateAsUTXO(tr):
 			x = tnxs[tnx]
 			x = ast.literal_eval(x)
 			for output in x['outputs']:
+				if (output is None):
+					continue
+
 				allTxids[tnx + str(output['output_no'])] = x['outputs']
 
 	print("all txids in UTXO ")
 
+
 	for i in allTxids:
 		print(i)
+
+
 
 	print('all prev trans')
 	for i in inputTxids:
@@ -223,8 +207,6 @@ while(1):
 
 		print('	-> processing transaction \'', end ='' )
 		print(txid,'\'') #print txid
-
-
 		print(m)
 		print("\n\n\n")
 

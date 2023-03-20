@@ -42,7 +42,7 @@ def neededUTXO(amount):
 	for tr in utxos:
 		total+=tr[2]
 	if(total < amount):
-		return 0
+		return -1
 	rList = []
 	cur = 0
 	for tr in utxos:
@@ -63,6 +63,11 @@ def hash_tr(tr):
 def pay(amount, recv, fees):
 	utxos = neededUTXO(amount)
 	inputs = []
+
+	if(utxos == -1):
+		print("NOT ENOUGH BALANCE TO COMPLETE TRANSACTION")
+		return
+
 	available = 0
 	for i in utxos:
 		available += i[2]
@@ -103,48 +108,28 @@ def make_transaction(inputs, outputs):
 
 	transaction['inputs']=inputs
 	'''
-	transaction['trans_identifier']=prev_tran
-	transaction['output_index']= index
-	transaction['sequence']=1
-	s=str(transaction['output_index'])+str(transaction['trans_identifier'])
-	s=rsa.encrypt(s.encode('UTF-8'),priv)
-	w=pub_str
-	k={'signature':s, 'public': w }
-	transaction['signature_scr']=k
+	dict of
+		'prev_tran'
+		'output_index'
+		'sequence'
+		'sigScr' dict of
+				'signature'
+				'publicKey'
 	'''
 
 	#outputs
 	#list of outputs
 	transaction['outputs'] = outputs
+	'''
+	dict of
+		'output_no'
+		'pubkey_scr'
+		'amount'
+		'locktime'
+	'''
 
-	'''
-	output={'output_no': 0, 'amount':100, 'pubkey_scr':recv_scr, 'locktime': transaction['sequence'] }
-	transaction['outputs'].append(output)
-
-	output={'output_no': 1, 'amount':total_amount - amount - tran_fee, 'pubkey_scr':pubkeyhash  , 'locktime': 0 }
-	transaction['outputs'].append(output)
-	'''
-	'''
-	transaction['output_number']=3
-	transaction['amount']=100
-	transaction['pubkey_scr']=recv_scr
-	transaction['locktime']=transaction['sequence']
-	'''
 	return transaction
 
-#We have the requirement to find spent and unspent transacion outputs.
-#To start things off, we are gonna make a function to spend UTXOs
-
-	'''
-	transaction['trans_identifier']=prev_tran
-	transaction['output_index']= index
-	transaction['sequence']=1
-	s=str(transaction['output_index'])+str(transaction['trans_identifier'])
-	s=rsa.encrypt(s.encode('UTF-8'),priv)
-	w=pub_str
-	k={'signature':s, 'public': w }
-	transaction['signature_scr']=k
-	'''
 def make_inp(prev_tran, output_index):
 	input = {}
 	#needs 4 things
@@ -180,109 +165,38 @@ transactions_recv= []
 
 latest_block = 'block0.txt'
 
+def checkUserFromTXNS(txns):
+	utxo = []
+	#public_key that we import in the start
+	pkhash = hashlib.sha256(public_key.to_string()).hexdigest()
 
-#TODO identify UTXOs in latest block, can be parameterized tp 
+	for txid in txns:
+		tr = ast.literal_eval(txns[txid])
+		for w in range(len(tr['outputs'])):
+			i = tr['outputs'][w]
+			if ( i is None):
+				continue
+			if (i['pubkey_scr']==pkhash):
+				print("APPENDED TR WITH TXID ",hash_tr(tr), "WITH OUTPUT INDEX",w )
+				utxo.append((txid, w, tr['outputs'][w]['amount'] ))
+				print(utxo)
+	return utxo
+
 def UTXOs():
-	with open('usr_cache/balances.txt', mode='r') as f:
-		dict_str = f.read()
-	balances = ast.literal_eval(dict_str) #check if cache of utxo stored
+	with open('UTXO/UTXO.tmp') as f:
+		UTXO = f.read()
+	UTXO = ast.literal_eval(UTXO)
+	userUTXO = []
+	for block in UTXO:
+		txns = ast.literal_eval(UTXO[block])
+		print("PROCESSING ",block)
+		userTXNS = checkUserFromTXNS(txns)
+		[ userUTXO.append(i) for i in userTXNS]
+		print(userUTXO)
 
-	if latest_block in balances:
-		print('CACHE HIT')
-		global transactions_recv
-		transactions_recv = balances[latest_block]
-		#print(transactions_recv)
-		return balances[latest_block]
-
-	#read block file
-	with open('blocks/'+latest_block, mode='r') as f:
-		block_str = f.read()
-	block = ast.literal_eval(block_str)
+	return userUTXO
 
 
-	for item in block.items():
-		#item is of format -> txid, txStr
-		tr_data = ast.literal_eval(item[1])
-		outputs = tr_data['outputs']
-		for output in outputs:
-			if(output['pubkey_scr']==publickey_hash):
-				transactions_recv.append((item[0],output['output_no'],output['amount']))
-	balances[latest_block] = transactions_recv
-	with open('usr_cache/balances.txt', mode='w') as f:
-		f.write(str(balances))
-	return transactions_recv
-
-transactions_utxo = []
-def parse_blockTx(block_str):
-	block = ast.literal_eval(block_str)
-	for item in block.items():
-		tr_data = ast.literal_eval(item[1])
-		outputs = tr_data['outputs']
-		for output in outputs:
-			if(output['pubkey_scr']==publickey_hash):
-				transactions_utxo.append((item[0],output['output_no'],output['amount']))
-
-	return transactions_utxo
-
-
-def check_balance():
-	#first we check all transactions recieved to us
-	print(pubkeyhash,'\n')
-	with open('blocks.txt', mode = 'r') as file:
-		x=file.read()
-		print('readed line ',x)
-		trans = ast.literal_eval(x)[1]
-		for y in trans.items():
-			i=y[1]
-
-
-			tr = ast.literal_eval(i)
-			#print(type(tr),tr)
-			print('trans: ',y[0])
-			for x in tr['outputs']:
-				print(x['output_no'],x['pubkey_scr'])
-				if(x['pubkey_scr']==pubkeyhash):
-					transactions_recv.append((y[0],x['output_no']))
-	print(transactions_recv)
-	UTXO={}
-	for i in transactions_recv:
-		UTXO[i]=0
-	tranrecv_outputs=[]
-	test = transactions_recv[0]
-	sigscript(test[0],test[1]  )
-
-
-
-	'''
-	combos=[]
-	with open('mempool.txt') as file:
-		for tran in file:
-			tr=ast.literal_eval(tran)
-			if(tr['pubkey_scr']==pubkeyhash):
-				combos.append((tr['output_index'],tr['sequence'],tr['amount']))
-	freqc = {}
-	for combo in combos:
-		freqc[combo]=0
-	print(freqc)
-	with open('mempool.txt') as file:
-		for tran in file:
-			tr=ast.literal_eval(tran)
-			combo=((int(tr['output_index']),int(tr['sequence']),int(tr['amount'])))
-			freqc[combo]+=1
-
-	balance=0
-	print(freqc)
-	for key,val in freqc.items():
-		if(val==1):
-			 balance+=key[2]
-	print('\nBALANCE IS ',balance)
-	'''
-
-def gettxid():
-	x=0
-	with open('mempool.txt') as file:
-		x+=1
-	return x
 
 if(choice==4):
 	print('Enter parameters')

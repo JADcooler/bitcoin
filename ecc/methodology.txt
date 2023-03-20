@@ -27,14 +27,20 @@
 ## TESTING FOR ACTUAL TRANSACTION DATA IN MEMPOOL/ BLOCK -- DONE
 ## by verifying if input referenced exists in UTXO set
 
-## REMOVE REFFERENCED PREV TRAN OUTPUT IF VALID FROM UTXO -- IN PROGRESS
+## REMOVE REFFERENCED PREV TRAN OUTPUT IF VALID FROM UTXO -- DONE
+
 // then we update available UTXOs by removing ones we used as inp
 // we update utxo.tmp if transaction. UTXOs.txt if block
 // if UTXO isn't available, we reject.
 
+## MAKE MAIN TO USE UTXO.tmp for available UTXO -- DONE
+	#-> subtask clean output index reference bug -- DONE
 
-// we use UTXO.tmp as balance in main.py
+## CLEAN MAIN -- okayish progress, IN HOLD
 
+## UPDATE UTXO.tmp from received transactions --TO START
+
+## MINING.hmmmmmmmm
 -> start mining (miner.py)
 
 // in script, we can choose arbitrary time to start mining.
