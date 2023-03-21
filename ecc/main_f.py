@@ -244,8 +244,23 @@ while(1):
 			f.write(str(mempool))
 		print('WRITTEN IN MEMPOOL')
 
+		with open('UTXO/UTXO.tmp','r') as f:
+			u = f.read()
+			u = ast.literal_eval(u)
 
-		#with open('mempool.txt',mode='a+') as file:
+		with open('UTXO/UTXO.tmp','w') as f:
+			if('mempool' in u):
+				txns = ast.literal_eval(u['mempool'])
+				txns[txid] = m.decode()
+			else:
+				txns = {txid: m.decode()}
+
+
+			u['mempool'] = str(txns)
+			f.write(str(u))
+
+
+		#with open('mempool.txt',mode='a+') as file: 
 		#	file.write(str(trans)+'\n')
 
 #END

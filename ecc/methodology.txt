@@ -38,9 +38,14 @@
 
 ## CLEAN MAIN -- okayish progress, IN HOLD
 
-## UPDATE UTXO.tmp from received transactions --TO START
+## UPDATE UTXO.tmp from received transactions --DONE
+	#-> add mempool UTXOs to UTXO.tmp
 
-## MINING.hmmmmmmmm
+## FIX NEGATIVE FEE AMOUNT BUG ON SPENDING LAST UTXO -- HOLD
+
+## DISPLAY BALANCE -- HOLD
+
+## MINING.hmmmmmmmm -- TO START
 -> start mining (miner.py)
 
 // in script, we can choose arbitrary time to start mining.
