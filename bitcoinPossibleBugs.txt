@@ -1,0 +1,7 @@
+so,
+If I'm making a transaction that resides in the mempool.
+I'm making fees ~ 0
+so, the input it used would have to be moved out of the 
+UTXO set.
+
+is this requirement being fulfilled?

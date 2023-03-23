@@ -1,4 +1,0 @@
-if someone sends the block having the perfect nonce value and 
-someone in the network decides to change the coinbase transaction alone
-it would be invalid since the block no longer hashes to the required one.
-

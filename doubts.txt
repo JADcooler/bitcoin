@@ -1,3 +1,10 @@
 if order of transaction is so important to determine merkle root
 what keeps them fixed? what if i recieve one after another though their
 order is vice-verca?
+## its tx fee
+
+Can I use the same transaction for prev txid
+
+## nop it doesn't exist in UTXO set yet
+
+

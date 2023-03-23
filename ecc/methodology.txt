@@ -45,6 +45,10 @@
 
 ## DISPLAY BALANCE -- HOLD
 
+## PRETTY PRINT EVERYWHERE -- PRIORITY HOLD 
+
+## 
+
 ## MINING.hmmmmmmmm -- TO START
 -> start mining (miner.py)
 
