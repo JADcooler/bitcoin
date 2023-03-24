@@ -4,7 +4,7 @@ import hashlib
 from ecdsa import BadSignatureError, VerifyingKey
 
 s=socket(AF_INET, SOCK_DGRAM)
-s.bind(('',12345))
+s.bind(('127.0.0.1',12345))
 
 def hash_tr(tr):
         hash_lvl1 = hashlib.sha256(str(tr).encode()).hexdigest()

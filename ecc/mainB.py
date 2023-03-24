@@ -7,7 +7,8 @@ import hashlib #to compute merkle root
 from pprint import pprint
 import sys
 import emoji
-
+from ecdsa import VerifyingKey
+global BLOCK_REWARD_GLOB
 
 def merkle(mem):
 	x = mem.copy()
@@ -72,4 +73,41 @@ def mine():
 	print("time took ",time.time() - start, " seconds")
 	print(a)
 
-mine()
+def coinbase():
+	print(pubkeyHash())
+
+
+
+
+
+
+#FUNTIONS TO MAKE TX
+
+def pubkeyHash():
+
+	with open('ecc_public.pem') as f:
+		public_key = VerifyingKey.from_pem(f.read())
+	return hashlib.sha256(public_key.to_string()).hexdigest()
+
+def make_out(recv):
+	output1={'output_no': 0, 'amount':BLOCK_REWARD_GLOB, 'pubkey_scr':recv, 'locktime': 100} #locktime of 100 for coinbase UTXOs
+	return [output1]
+
+def make_coinbase(outputs):
+	transaction = {}
+	transaction['version']=1.0
+	#inputs reference UTXO
+	#list of inputs
+
+	transaction['inputs']=[]
+	#list of outputs
+	transaction['outputs'] = outputs
+
+	return transaction
+
+
+#MAIN
+
+coinbase()
+
+

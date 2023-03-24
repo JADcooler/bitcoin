@@ -47,11 +47,11 @@
 
 ## PRETTY PRINT EVERYWHERE -- PRIORITY HOLD 
 
-## use multiple keys to test
+## use multiple keys to test -- DONE
 
 ## MINING
 
-## add coinbase txn
+## add coinbase txn -- IN PROGRESS
 
 ## broadcast block once mined
 
@@ -60,6 +60,7 @@
 ##	-> uses transactions inside the block txns to update UTXOs.txt
 ##	-> python reset to have UTXO.tmp use for mempool
 
+## CODE CLEANUP Import common functions from a py avoid duplicates - HOLD
       
 -> start mining (miner.py)
 
