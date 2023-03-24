@@ -52,14 +52,18 @@
 ## MINING
 
 ## add coinbase txn -- IN PROGRESS
+##	-> add coinbase, with sum of fees, and current block reward
+
 
 ## broadcast block once mined
 
 ## MAIN_F update where it receives blocks
-##	-> validates if block header merkle root hash is crct
+##	-> validate
+##		-> merkleroot, block reward, sum of fees of txns
 ##	-> uses transactions inside the block txns to update UTXOs.txt
 ##	-> python reset to have UTXO.tmp use for mempool
-
+##	-> Replay tx input deletion of mempool in UTXO.tmp
+##		-> Show and disregard newly discovered invalid inputs
 ## CODE CLEANUP Import common functions from a py avoid duplicates - HOLD
       
 -> start mining (miner.py)
