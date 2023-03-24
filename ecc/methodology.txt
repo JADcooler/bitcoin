@@ -47,9 +47,20 @@
 
 ## PRETTY PRINT EVERYWHERE -- PRIORITY HOLD 
 
-## 
+## use multiple keys to test
 
-## MINING.hmmmmmmmm -- TO START
+## MINING
+
+## add coinbase txn
+
+## broadcast block once mined
+
+## MAIN_F update where it receives blocks
+##	-> validates if block header merkle root hash is crct
+##	-> uses transactions inside the block txns to update UTXOs.txt
+##	-> python reset to have UTXO.tmp use for mempool
+
+      
 -> start mining (miner.py)
 
 // in script, we can choose arbitrary time to start mining.
