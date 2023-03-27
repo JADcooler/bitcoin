@@ -36,11 +36,45 @@ def merkle(mem):
 #prev block hash
 #nonce
 
+
+def getAmount(txid, on):
+	
+
+
+txidByFees = [] #approach to sort txids by fees and include X amount of txs
+# approach to send transactions to main_f and he subtracts inputs and marks as UTXO
+# by default all txns in mempool are valid, but in cases of race condition
+# where one input is used for different transactions by same user, the one
+# with higher fee is valid and the next one should not be
+
+# in the implementation, the first one is considered valid, that approach is wrong
+
+def sumOfFee(mem):
+
+	for txid in mem:
+		inputs = mem[txid]['inputs']
+		outputs = mem[txid]['outputs']
+		inputAmount = 0
+		outputAmount = 0
+		for i in inputs:
+			if i is None:
+				continue
+			inputAmount+=getAmount(i['prev_tran'],i['output_index'])
+		for i in outputs:
+			if i is None:
+				continue
+			outputAmount += i['amount']
+
+		fee = outputAmount - inputAmount
+		txidByFees.append(fee, txid)
+
+
 def mine():
 	#to get merkle root from mempool
 	with open('mempool.txt') as f:
 		mempool = f.read()
 	mem = ast.literal_eval(mempool)
+	sumOfFee(mem) #txid to str(tx data)
 	merkleRoot = merkle(mem)
 	print("Merkle root is ", merkleRoot  )
 
