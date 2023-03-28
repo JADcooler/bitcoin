@@ -25,8 +25,8 @@ def merkle(mem):
 			x = res[i] + res[i-1]
 			hash = hashlib.sha256(x.encode()).hexdigest()
 			resN.append(hash)
-		print("Length of merkle tree -> ",len(resN))
-		print("merkle tree -> ")
+		pprint("Length of merkle tree -> ",len(resN))
+		pprint("merkle tree -> ")
 		pprint(resN)
 		res = resN.copy()
 	return res[0]
@@ -47,7 +47,7 @@ def getAmount(txid, on):
 		txns = ast.literal_eval(txns)
 		if txid in txns:
 			tx = ast.literal_eval(txns[txid])
-			if (on >= len(tx['outputs']):
+			if (on >= len(tx['outputs']) ):
 				return (-1,-1)
 			return tx['outputs'][on]['amount']
 
@@ -56,14 +56,13 @@ def getAmount(txid, on):
 		m = f.read()
 	m = ast.literal_eval(m)
 	if txid in m:
-		tx = ast.literal_eval(txns[txid])
-		if (on >= len(tx['outputs']):
+		tx = ast.literal_eval(m[txid])
+		if (on >= len(tx['outputs'])):
 			return (-1,-1)
 		return tx['outputs'][on]['amount']
 	return (-1,-2)
 
-txidByFees = [] #approach to sort txids by fees and include X amount 
-	of txs
+txidByFees = [] #approach to sort txids by fees and include X amount of txs
 # approach to send transactions to main_f and he subtracts inputs and marks as UTXO
 # by default all txns in mempool are valid, but in cases of race condition
 # where one input is used for different transactions by same user, the one
@@ -71,11 +70,16 @@ txidByFees = [] #approach to sort txids by fees and include X amount
 
 # in the implementation, the first one is considered valid, that approach is wrong
 
+
 def sumOfFee(mem):
 
 	for txid in mem:
-		inputs = mem[txid]['inputs']
-		outputs = mem[txid]['outputs']
+		tx = ast.literal_eval(mem[txid])
+		pprint(tx)
+		if(tx == 0):
+			continue
+		inputs =tx['inputs']
+		outputs = tx['outputs']
 		inputAmount = 0
 		outputAmount = 0
 		for i in inputs:
@@ -85,10 +89,10 @@ def sumOfFee(mem):
 		for i in outputs:
 			if i is None:
 				continue
-			outputAmount += i['amount']
+			outputAmount += int(i['amount'])
 
 		fee = outputAmount - inputAmount
-		txidByFees.append(fee, txid)
+		txidByFees.append((fee, txid))
 
 
 def mine():
@@ -96,9 +100,8 @@ def mine():
 	with open('mempool.txt') as f:
 		mempool = f.read()
 	mem = ast.literal_eval(mempool)
-	sumOfFee(mem) #txid to str(tx data)
 	merkleRoot = merkle(mem)
-	print("Merkle root is ", merkleRoot  )
+	pprint("Merkle root is ", merkleRoot  )
 
 	with open('blocks/blockHeaders.txt') as f:
 		d = ast.literal_eval(f.read())
@@ -113,7 +116,7 @@ def mine():
 			'nonce'    : 0
 			}
 
-	print("STARTING BLOCK MINING 🔴")
+	pprint("STARTING BLOCK MINING 🔴")
 
 	time.sleep(1)
 
@@ -124,14 +127,20 @@ def mine():
 		blockHeader['nonce']+=1
 		rawData = str(blockHeader).encode()
 		a = hashlib.sha256(rawData).hexdigest()
-		print(a)
-	print("Block hash with required difficulty found 🟢")
-	print("time took ",time.time() - start, " seconds")
-	print(a)
+		pprint(a)
+	pprint("Block hash with required difficulty found 🟢")
+	pprint("time took ",time.time() - start, " seconds")
+	pprint(a)
+
+
 
 def coinbase():
-	print(pubkeyHash())
+	with open('mempool.txt') as f:
+		mempool = f.read()
+	mem = ast.literal_eval(mempool)
 
+	sumOfFee(mem) #txid to str(tx data)
+	pprint(txidByFees)
 
 
 
