@@ -38,10 +38,32 @@ def merkle(mem):
 
 
 def getAmount(txid, on):
-	
+	#Tx from blocks
+	with open('blocks/blockHeaders.txt') as f:
+		b = f.read()
+	b = ast.literal_eval(b)
+	for block in b:
+		txns = b[block]
+		txns = ast.literal_eval(txns)
+		if txid in txns:
+			tx = ast.literal_eval(txns[txid])
+			if (on >= len(tx['outputs']):
+				return (-1,-1)
+			return tx['outputs'][on]['amount']
 
+	#reaches here if referenced txid and on don't exist in blocks
+	with open('mempool.txt') as f:
+		m = f.read()
+	m = ast.literal_eval(m)
+	if txid in m:
+		tx = ast.literal_eval(txns[txid])
+		if (on >= len(tx['outputs']):
+			return (-1,-1)
+		return tx['outputs'][on]['amount']
+	return (-1,-2)
 
-txidByFees = [] #approach to sort txids by fees and include X amount of txs
+txidByFees = [] #approach to sort txids by fees and include X amount 
+	of txs
 # approach to send transactions to main_f and he subtracts inputs and marks as UTXO
 # by default all txns in mempool are valid, but in cases of race condition
 # where one input is used for different transactions by same user, the one
