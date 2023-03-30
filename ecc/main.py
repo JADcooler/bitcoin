@@ -1,6 +1,9 @@
+
 from socket import * #p2p network
 from ecdsa import SigningKey
 from ecdsa import BadSignatureError, VerifyingKey #signature
+
+from pprint import pprint
 
 import hashlib	# sha256
 import sys
@@ -36,7 +39,6 @@ pubkeyhash = hashlib.sha256(public_key.to_string()).hexdigest()
 
 
 def neededUTXO(amount):
-	amount = int(amount)
 	utxos = UTXOs()
 	total = 0
 	for tr in utxos:
@@ -61,18 +63,28 @@ def hash_tr(tr):
 
 
 def pay(amount, recv, fees):
-	utxos = neededUTXO(amount)
+	utxos = neededUTXO(int(amount)+int(fees))
 	inputs = []
+
+
 
 	if(utxos == -1):
 		print("NOT ENOUGH BALANCE TO COMPLETE TRANSACTION")
 		return
 
+	print("\n\nINPUTS")
+	print("------")
+	pprint(utxos)
+	print("\n\n")
 	available = 0
 	for i in utxos:
 		available += i[2]
 		inputs.append(make_inp(i[0],i[1]))
 	outputs = make_out(available, amount, recv, fees)
+	print("OUTPUTS")
+	print("-------")
+	pprint(outputs)
+	print("\n\n")
 	tr =  make_transaction(inputs, outputs)
 	#After payment gotta update utxo list, we do that in main_f
 	#we just broadcast Transaction
@@ -85,7 +97,10 @@ s = socket(AF_INET, SOCK_DGRAM)
 s.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
 
 def send(string):
-	s.sendto(string.encode(),('255.255.255.255',12345))
+	s.sendto(string.encode(),('255.255.255.255',12345)) #this is sufficient in a Real time environment
+	#TEST NODES
+	s.sendto(string.encode(),('127.0.0.1',12345))
+	s.sendto(string.encode(),('127.0.1.0',12345))
 
 def broadcast(tr):
 	print("transmitter txid " + hash_tr(tr))
@@ -146,12 +161,10 @@ def make_inp(prev_tran, output_index):
 	signature = cipherText.decode('ISO-8859-1') #byte to string
 	pkString = public_key.to_string().decode('ISO-8859-1')
 	sigScr = {'signature': signature, 'publicKey': pkString}
-	print(sigScr)
 	d_sign = sigScr['signature'].encode('ISO-8859-1')
 	d_publ = sigScr['publicKey'].encode('ISO-8859-1')
 	d_publicKey = VerifyingKey.from_string(d_publ)
 	x = d_publicKey.verify(d_sign, plainText.encode())
-	print(x)
 	#signature script END - 4
 	input['sigScr'] = sigScr
 	return input
@@ -315,7 +328,8 @@ if(choice==9):
 if(choice==10):
 	x=input('amount ')
 	y=input('receiver ')
-	z=pay(x,y, 3)
+	w=input('fees ')
+	z=pay(x,y, int(w))
 	print('starts here')
 	print(str(z))
 #end

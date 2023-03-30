@@ -4,6 +4,8 @@ import hashlib
 from ecdsa import BadSignatureError, VerifyingKey
 
 s=socket(AF_INET, SOCK_DGRAM)
+#test node, in deployment we run in s.bind('',12345))
+#such that it can listen from 255.255.255.255
 s.bind(('127.0.0.1',12345))
 
 def hash_tr(tr):

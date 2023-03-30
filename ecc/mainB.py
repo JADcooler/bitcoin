@@ -8,7 +8,11 @@ from pprint import pprint
 import sys
 import emoji
 from ecdsa import VerifyingKey
-global BLOCK_REWARD_GLOB
+
+
+BLOCK_REWARD_GLOB = 10
+
+MINER_PUBLIC_KEY = "TODO"
 
 def merkle(mem):
 	x = mem.copy()
@@ -91,7 +95,7 @@ def sumOfFee(mem):
 				continue
 			outputAmount += int(i['amount'])
 
-		fee = outputAmount - inputAmount
+		fee = inputAmount - outputAmount
 		txidByFees.append((fee, txid))
 
 
@@ -134,16 +138,30 @@ def mine():
 
 
 
-def coinbase():
+def start(w):
 	with open('mempool.txt') as f:
 		mempool = f.read()
 	mem = ast.literal_eval(mempool)
 
 	sumOfFee(mem) #txid to str(tx data)
-	pprint(txidByFees)
+	txidByFees.sort(reverse=True)
+
+	includeTxns = txidByFees[:w]
+	pprint(includeTxns)
+
+	output = make_out(MINER_PUBLIC_KEY, includeTxns)
+
+	fees = 0
+	for i in includeTxns:
+		fees+=i[0]
 
 
-
+	coinbaseTx = make_coinbase(output)
+	print("\n\nTHE COINBASE TRANSACTION IS ")
+	print("--------------------------- ")
+	print("\nThe BLOCK REWARD IS ",10)
+	print("\nMINER FEES FROM TRANSACTION ADDED IS ",fees,"\n")
+	pprint(coinbaseTx)
 
 
 #FUNTIONS TO MAKE TX
@@ -154,9 +172,13 @@ def pubkeyHash():
 		public_key = VerifyingKey.from_pem(f.read())
 	return hashlib.sha256(public_key.to_string()).hexdigest()
 
-def make_out(recv):
-	output1={'output_no': 0, 'amount':BLOCK_REWARD_GLOB, 'pubkey_scr':recv, 'locktime': 100} #locktime of 100 for coinbase UTXOs
-	return [output1]
+def make_out(recv, feeTXID):
+	txfees = 0
+	for i in feeTXID:
+		txfees += i[0]
+
+	output1={'output_no': 0, 'amount':BLOCK_REWARD_GLOB + txfees, 'pubkey_scr':recv, 'locktime': 100} #locktime of 100 for coinbase UTXOs
+	return [output1,]
 
 def make_coinbase(outputs):
 	transaction = {}
@@ -173,6 +195,8 @@ def make_coinbase(outputs):
 
 #MAIN
 
-coinbase()
+def Init():
+	w = input("Enter number of transactions to include ")
+	start(int(w))
 
-
+Init()

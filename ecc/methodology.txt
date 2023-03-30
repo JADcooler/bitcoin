@@ -51,8 +51,8 @@
 
 ## MINING
 
-## add coinbase txn -- IN PROGRESS
-##	-> add coinbase, with sum of fees, and current block reward IN PROGRESS
+## add coinbase txn -- DONE
+##	-> add coinbase, with sum of fees, and current block reward -- DONE
 
 ## remove validation by deletion of transactions that are received in the mempool
 ## add validation by deletion [None]  before block mining after sorting by fees
