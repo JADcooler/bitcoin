@@ -54,9 +54,6 @@
 ## add coinbase txn -- DONE
 ##	-> add coinbase, with sum of fees, and current block reward -- DONE
 
-## remove validation by deletion of transactions that are received in the mempool
-## add validation by deletion [None]  before block mining after sorting by fees
-this way valid/invalid transactions would be in the mempool
 
 sort desc by fees, THEN check valid ones and remove invalid ones.
 from the valid ones that are sorted by fees, select X amount of txns to include
@@ -87,6 +84,9 @@ from the valid ones that are sorted by fees, select X amount of txns to include
    //tr tr ah we can send instead of in bulk. in case some
    //new node requests it.
 
+
+
+# CLEAN ECC DIRECTORY .PY FILES 
 
 ----------------------------------------------------------------
 

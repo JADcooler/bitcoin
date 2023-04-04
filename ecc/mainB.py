@@ -10,6 +10,9 @@ import emoji
 from ecdsa import VerifyingKey
 
 
+#LOCAL FILE IMPORTS
+import CommonFunctionLibrary
+
 BLOCK_REWARD_GLOB = 10
 
 MINER_PUBLIC_KEY = "TODO"

@@ -223,10 +223,6 @@ while(1):
 		if(not cont):
 			continue
 
-
-
-		#REMOVING DELETETXOUTPUT USE BECAUSE INPUT VALIDATION IS DONE PRIORITIZING HIGHER FEE
-		'''
 		flag = 1
 		for i in params:
 			bool = deleteTxOutputs(i[0], i[1])
@@ -235,10 +231,6 @@ while(1):
 				flag = 0
 		if(not flag):
 			continue
-
-		'''
-		#REMOVING DELETETXOUTPUT USE BECAUSE INPUT VALIDATION IS DONE PRIORITIZING HIGHER FEE
-
 
 		with open('mempool.txt', 'r') as f:
 			x = f.read()

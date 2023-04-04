@@ -22,3 +22,11 @@ where your transaction was put.
 it's recommended to wait just in case something goes wrong with the 
 blocks.
 
+_____________________________________________________________
+
+
+question:
+
+Multple transactions in the mempool using the same input
+Can they even be made?
+Are they validated by decreasing fee?
