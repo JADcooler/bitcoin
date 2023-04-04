@@ -223,8 +223,10 @@ while(1):
 		if(not cont):
 			continue
 
-		#TODO del inputs from UTXO set / UTXO.tmp
 
+
+		#REMOVING DELETETXOUTPUT USE BECAUSE INPUT VALIDATION IS DONE PRIORITIZING HIGHER FEE
+		'''
 		flag = 1
 		for i in params:
 			bool = deleteTxOutputs(i[0], i[1])
@@ -234,12 +236,14 @@ while(1):
 		if(not flag):
 			continue
 
+		'''
+		#REMOVING DELETETXOUTPUT USE BECAUSE INPUT VALIDATION IS DONE PRIORITIZING HIGHER FEE
+
+
 		with open('mempool.txt', 'r') as f:
 			x = f.read()
 
 		mempool = ast.literal_eval(x)
-
-		#print("MEMPOOL IS ", mempool)
 
 		mempool[txid] = m.decode()
 		with open('mempool.txt', 'w') as f:
