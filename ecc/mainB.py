@@ -11,7 +11,7 @@ from ecdsa import VerifyingKey
 
 
 #LOCAL FILE IMPORTS
-import CommonFunctionLibrary
+from CommonFunctionLibrary import hash_tr
 
 BLOCK_REWARD_GLOB = 10
 
@@ -102,11 +102,11 @@ def sumOfFee(mem):
 		txidByFees.append((fee, txid))
 
 
-def mine():
+def mine(mem):
 	#to get merkle root from mempool
-	with open('mempool.txt') as f:
-		mempool = f.read()
-	mem = ast.literal_eval(mempool)
+	# with open('mempool.txt') as f:
+	# 	mempool = f.read()
+	# mem = ast.literal_eval(mempool)
 	merkleRoot = merkle(mem)
 	pprint("Merkle root is ", merkleRoot  )
 
@@ -130,14 +130,18 @@ def mine():
 
 	a = 'fff' #dummy data to pass the loop
 	start = time.time()
-	while(int(a[:difficulty] , 16)!=0):
+	while(int(a[:difficulty] , 16)!=0):  #sleeek
 		blockHeader['nonce']+=1
 		rawData = str(blockHeader).encode()
 		a = hashlib.sha256(rawData).hexdigest()
 		pprint(a)
+
+
 	pprint("Block hash with required difficulty found 🟢")
 	pprint("time took ",time.time() - start, " seconds")
 	pprint(a)
+
+	return blockHeader
 
 
 
@@ -145,6 +149,10 @@ def start(w):
 	with open('mempool.txt') as f:
 		mempool = f.read()
 	mem = ast.literal_eval(mempool)
+
+	print("OLD MEM IS ")
+	pprint(mem)
+	print("\n")
 
 	sumOfFee(mem) #txid to str(tx data)
 	txidByFees.sort(reverse=True)
@@ -158,7 +166,11 @@ def start(w):
 	for i in includeTxns:
 		fees+=i[0]
 
-
+	newTxids = []
+	for i in includeTxns:
+		newTxids.append(i[1])
+	
+	#mempool is just txid: str(tx)
 	coinbaseTx = make_coinbase(output)
 	print("\n\nTHE COINBASE TRANSACTION IS ")
 	print("--------------------------- ")
@@ -166,6 +178,32 @@ def start(w):
 	print("\nMINER FEES FROM TRANSACTION ADDED IS ",fees,"\n")
 	pprint(coinbaseTx)
 
+	coinbaseTxid = hash_tr(coinbaseTx)
+	#right now, we have list of txid we want to include and the coinbase txn
+	#The plan is to create new mem (dict of txid: str(tx)) with fee sort and coinbase
+
+	newMem = {}
+	
+
+	for txid, tx in mem:
+		if txid in newTxids:
+			newMem[txid] = str(tx)
+
+	newMem[coinbaseTxid] = str(coinbaseTx) #added last to preserve coinbase even on txid collision
+	
+	print("NEW MEM IS ")
+	pprint(newMem)
+	print("\n")
+
+	#starting to mine
+	blockHeader = mine(newMem)
+
+	rawData = str(blockHeader).encode()
+	blockHash = hashlib.sha256(rawData).hexdigest()
+
+	block = [blockHash , blockHeader, newMem]
+
+	broadcast(block)
 
 #FUNTIONS TO MAKE TX
 
@@ -196,10 +234,33 @@ def make_coinbase(outputs):
 	return transaction
 
 
+s = socket(AF_INET, SOCK_DGRAM)
+s.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
+
+
+def send(string):
+	s.sendto(string.encode(),('255.255.255.255',12345)) #this is sufficient in a Real time environment
+	#TEST NODES
+	s.sendto(string.encode(),('127.0.0.1',12345))
+	s.sendto(string.encode(),('127.0.1.0',12345))
+
+def broadcast(bl):
+	print("Sending block ")
+	send("block")
+	#bl is a list, first parameter contains block Hash and second one has block Header
+	#third is list of transactions in block, includes coinbase
+	send(bl[0])
+	send(bl[1])
+	send(bl[2])
+	
+
+
 #MAIN
 
 def Init():
 	w = input("Enter number of transactions to include ")
 	start(int(w))
+
+
 
 Init()

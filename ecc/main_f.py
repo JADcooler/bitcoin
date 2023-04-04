@@ -8,6 +8,14 @@ s=socket(AF_INET, SOCK_DGRAM)
 #such that it can listen from 255.255.255.255
 s.bind(('127.0.0.1',12345))
 
+#important that s.bind has to be in line 8(0-8) or 9(1-9) for local node scripts
+
+from pprint import pprint
+
+#importing from library
+from CommonFunctionLibrary import *
+
+
 def hash_tr(tr):
         hash_lvl1 = hashlib.sha256(str(tr).encode()).hexdigest()
         double_hash = hashlib.sha256(hash_lvl1.encode()).hexdigest()
@@ -36,10 +44,10 @@ def verifySignature(tr):
 		if(x == False):
 			flag=0
 
-	print("THIS SAYS THE PERSON WHO GAVE THE SIGNATURE WITH PUBLIC KEY, HAD ACTUALLY", "USED HIS PRIVATE KEY TO ENCRYPT PREV_TXID AND OUTPUT INDEX")
-	print("THIS IS USED SUCH THAT ONLY THE PERSON IN POSSESSION OF THE PRIVATE KEY", "FOR THAT PUBLIC KEY CAN USE HIS FUNDS")
-	print("---------------------------------------------------------------------------------")
-	print("THE REST WE HAVE TO DO IS VERIFY THAT THE INPUT REFERENCED EXISTS IN UTXO SET", 	"AND IS PAID TO TO HIM AND NOT OTHERS")
+	pprint("THIS SAYS THE PERSON WHO GAVE THE SIGNATURE WITH PUBLIC KEY, HAD ACTUALLY USED HIS PRIVATE KEY TO ENCRYPT PREV_TXID AND OUTPUT INDEX")
+	pprint("THIS IS USED SUCH THAT ONLY THE PERSON IN POSSESSION OF THE PRIVATE KEY FOR THAT PUBLIC KEY CAN USE HIS FUNDS")
+	pprint("---------------------------------------------------------------------------------")
+	pprint("THE REST WE HAVE TO DO IS VERIFY THAT THE INPUT REFERENCED EXISTS IN UTXO SET AND IS PAID TO TO HIM AND NOT OTHERS")
 
 	return flag
 
@@ -61,7 +69,7 @@ def deleteTxOutputs(txid, on):
 			blockF = block
 			break
 	if(blockF == ''):
-		print("NO BLOCK HAS REQUIRED TX")
+		pprint("NO BLOCK HAS REQUIRED TX")
 		return False
 
 	txns = ast.literal_eval(blocks[blockF])
@@ -74,7 +82,7 @@ def deleteTxOutputs(txid, on):
 			toPop = i
 			break
 	if(toPop == -1):
-		print("TXN DOES NOT HAVE REQUIRED OUTPUT INDEX")
+		pprint("TXN DOES NOT HAVE REQUIRED OUTPUT INDEX")
 		return False
 	#we are now about to modify txns string in block dict
 
@@ -98,10 +106,10 @@ def deleteTxOutputs(txid, on):
 
 def handleError(args):
 	if(args[0]  == (-1,-1)):
-		print("[FATAL ERROR] INVALID OUTPUT INDEX REFERENCED, DOESN'T EXIST OR HAS BEEN USED \n\n")
+		pprint("[FATAL ERROR] INVALID OUTPUT INDEX REFERENCED, DOESN'T EXIST OR HAS BEEN USED \n\n")
 		return False
 	elif(args[0] == (-1,-2)):
-		print("[FATAL ERROR] INPUT TXN AND OUTPUT INDEX DON'T EXIST IN UTXO SET")
+		pprint("[FATAL ERROR] INPUT TXN AND OUTPUT INDEX DON'T EXIST IN UTXO SET")
 		return False
 	return True
 
@@ -117,7 +125,7 @@ def validateAsUTXO(tr):
 
 	a = verifySignature(tr)
 	if(a==False):
-		print("INVALID SIGNATURE")
+		pprint("INVALID SIGNATURE")
 		return False
 
 	txid = hash_tr(tr)
@@ -130,7 +138,7 @@ def validateAsUTXO(tr):
 
 
 	#checking if all inputs reference the public key of tx maker
-	print("	\#checking if all inputs reference the public key of tx maker")
+	pprint("	\#checking if all inputs reference the public key of tx maker")
 
 	inputx = [ (i['prev_tran'], i['output_index']) for i in tr['inputs'] ]
 
@@ -140,7 +148,8 @@ def validateAsUTXO(tr):
 		for i in inputx:
 			if i[0] in txns: #i[0] is txid
 				txn = ast.literal_eval(txns[i[0]])
-				print(i[1], len(txn['outputs']), txn)
+				print(i[1], len(txn['outputs']))
+				pprint(txn)
 				b = 0
 				try:
 					b = txn['outputs'][i[1]]['pubkey_scr']
@@ -154,14 +163,15 @@ def validateAsUTXO(tr):
 
 
 	if(result == False):
-		print("NOT ALL INPUTS USED REFERENCE TX SIGNER ")
+		pprint("NOT ALL INPUTS USED REFERENCE TX SIGNER ")
 		return [(-1,-1)] #code (-1,-1) for invalid output index
 	#____________________________________________
 
 	inputTxids = [ i['prev_tran']+ str(i['output_index'])   for i in tr['inputs'] ]
 
 
-	print("Input prev_trans ", inputTxids)
+	print("Input prev_trans ")
+	pprint(inputTxids)
 	#approach to combine all transactions with o/p in UTXO and check if
 	#set prev tran is subset of all txids in UTXO
 	allTxids = {}
@@ -176,17 +186,17 @@ def validateAsUTXO(tr):
 
 				allTxids[tnx + str(output['output_no'])] = x['outputs']
 
-	print("all txids in UTXO ")
+	pprint("all txids in UTXO ")
 
 
 	for i in allTxids:
-		print(i)
+		pprint(i)
 
 
 
-	print('all prev trans')
+	pprint('all prev trans')
 	for i in inputTxids:
-		print(i)
+		pprint(i)
 
 	bool = set(inputTxids).issubset(set(allTxids.keys()))
 	print("they are equal? ",bool)
@@ -196,21 +206,47 @@ def validateAsUTXO(tr):
 	return [ (i['prev_tran'], i['output_index']) for i in tr['inputs'] ]
 
 
+def checkCoinbaseCount(mem):
+	c = 0
+	for txid in mem:
+		tx = mem[txid]
+		if(len(tx['inputs']) == 0):
+			c+=1
+	return c
+	
+
+def findCoinbase(mem):
+	for txid in mem:
+		tx = mem[txid]
+		if(len(tx['inputs'] == 0)):
+			return txid
+	return -1
+
+
+
 while(1):
 
-	print('waiting..')
+	pprint('waiting..')
 	m=s.recvfrom(1024)
 	x=m[0].decode()
-	print(x)
+	pprint(x)
 
 	if(x=='transaction'): #Start strings
+		m=s.recvfrom(1024)[0]
+		RECV_txid = m.decode()
+
+
 		m=s.recvfrom(2048)[0] #hope 2048 is ok..
 		txid = hash_tr(m.decode())
 
-		print('	-> processing transaction \'', end ='' )
-		print(txid,'\'') #print txid
-		print(m)
-		print("\n\n\n")
+		if(RECV_txid != txid):
+			pprint("FATAL: SENT TXID AND COMPUTED TXID DON'T MATCH")
+			continue
+
+		print('	-> processing transaction', end ='' )
+		pprint(txid) #print txid
+		pprint(m)
+		pprint("\n\n\n")
 
 		tr = ast.literal_eval(m.decode())
 
@@ -227,7 +263,7 @@ while(1):
 		for i in params:
 			bool = deleteTxOutputs(i[0], i[1])
 			if(not bool):
-				print("DELETE TX FAILED for (txid, on) ",i)
+				pprint("DELETE TX FAILED for (txid, on) ",i)
 				flag = 0
 		if(not flag):
 			continue
@@ -240,7 +276,7 @@ while(1):
 		mempool[txid] = m.decode()
 		with open('mempool.txt', 'w') as f:
 			f.write(str(mempool))
-		print('WRITTEN IN MEMPOOL')
+		pprint('WRITTEN IN MEMPOOL')
 
 		with open('UTXO/UTXO.tmp','r') as f:
 			u = f.read()
@@ -260,6 +296,52 @@ while(1):
 
 		#with open('mempool.txt',mode='a+') as file: 
 		#	file.write(str(trans)+'\n')
+	elif(x=='block'):
+		m=s.recvfrom(1024)[0] #block Hash
+		RECV_blHash = m.decode()
+
+
+		m=s.recvfrom(2048)[0] #We are just receiving the block Header
+		blockHash = hashlib.sha256(m).hexdigest()
+		blockHeader = ast.literal_eval(m.decode())
+
+		if(RECV_blHash != blockHash):
+			print("Unequal block hashes")
+		
+		m=s.recvfrom(2048)[0] #LAARRGE Data, may need attention in the near future. is block TXNS
+		#----------------------------------------------------------------------------------------		
+		#									BLOCK VERIFYING
+		#----------------------------------------------------------------------------------------
+		mem = ast.literal_eval(m.decode())
+
+		CoinbaseCount = checkCoinbaseCount(mem)
+		if( CoinbaseCount != 1):
+			print("invalid coinbase transaction count, Expected one. found ", CoinbaseCount )
+			continue
+
+
+		merkleRoot = merkle(mem)
+		bl_merkle = blockHeader['merkle']
+		if(merkleRoot != bl_merkle):
+			print("MERKLE TREES DON'T MATCH")
+			continue
+
+		feeList = sumOfFee(mem)
+		fees = 0
+		for f in feeList:
+			fees += f[0]
+		coinbaseTxid = findCoinbase(mem)
+		if(coinbaseTxid == -1):
+			print("COINBASE TRANSACTION DOESN'T EXIST")
+		coinbaseTx = ast.literal_eval(mem[coinbaseTxid])
+		co_fees = coinbaseTx['outputs'][0]['amount'] - BLOCK_REWARD_GLOB
+		if(co_fees != fees):
+			print("INVALID COINBASE TRANSACTION [OUTPUT AMOUNT IS DIFFERENT THAN EXPECTED] ")
+
+		#----------------------------------------------------------------------------------------		
+		#									BLOCK VERIFYING
+		#----------------------------------------------------------------------------------------
+
 
 #END
 

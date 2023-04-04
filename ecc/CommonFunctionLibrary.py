@@ -58,3 +58,58 @@ def handleError(args):
 		print("[FATAL ERROR] INPUT TXN AND OUTPUT INDEX DON'T EXIST IN UTXO SET")
 		return False
 	return True
+
+
+def hash_tr(tr):
+        hash_lvl1 = hashlib.sha256(str(tr).encode()).hexdigest()
+        double_hash = hashlib.sha256(hash_lvl1.encode()).hexdigest()
+        txid = double_hash
+        return txid
+
+
+def sumOfFee(mem):
+    txidByFees = []
+	for txid in mem:
+		tx = ast.literal_eval(mem[txid])
+		pprint(tx)
+		if(tx == 0):
+			continue
+		inputs =tx['inputs']
+		outputs = tx['outputs']
+		inputAmount = 0
+		outputAmount = 0
+		for i in inputs:
+			if i is None:
+				continue
+			inputAmount+=getAmount(i['prev_tran'],i['output_index'])
+		for i in outputs:
+			if i is None:
+				continue
+			outputAmount += int(i['amount'])
+
+		fee = inputAmount - outputAmount
+		txidByFees.append((fee, txid))
+    return txidByFees
+
+def merkle(mem):
+	x = mem.copy()
+	res = []
+	for i in x:
+		text = str(i) + str(x[i])
+		res.append(text)
+
+	while(len(res)!=1):
+		resN = []
+		if(len(res)%2 == 1):
+			res.append(res[0])
+		for i in range(1,len(res), 2):
+			x = res[i] + res[i-1]
+			hash = hashlib.sha256(x.encode()).hexdigest()
+			resN.append(hash)
+		pprint("Length of merkle tree -> ",len(resN))
+		pprint("merkle tree -> ")
+		pprint(resN)
+		res = resN.copy()
+	return res[0]
+
+BLOCK_REWARD_GLOB = 10

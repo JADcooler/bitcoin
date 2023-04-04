@@ -57,14 +57,14 @@
 
 sort desc by fees, THEN check valid ones and remove invalid ones.
 from the valid ones that are sorted by fees, select X amount of txns to include
-## Implement SORT Fee Approach 
+## Implement SORT Fee Approach -- DONE
 
 
-## broadcast block once mined
+## broadcast block once mined -- DONE
 
-## MAIN_F update where it receives blocks
-##	-> validate
-##		-> merkleroot, block reward, sum of fees of txns
+## MAIN_F update where it receives blocks -- IMPLEMENTED
+##	-> validate -- IMPLEMENTED
+##		-> merkleroot, block reward, sum of fees of txns -- IMPLEMENTED
 ##	-> uses transactions inside the block txns to update UTXOs.txt
 ##	-> python reset to have UTXO.tmp use for mempool
 ##	-> Replay tx input deletion of mempool in UTXO.tmp

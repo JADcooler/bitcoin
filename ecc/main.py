@@ -104,8 +104,10 @@ def send(string):
 
 def broadcast(tr):
 	print("transmitter txid " + hash_tr(tr))
-	send("transmitter txid " + hash_tr(tr))
+
 	send("transaction")
+	send(hash_tr(tr))
+
 	send(str(tr))
 
 
