@@ -1,3 +1,15 @@
+
+import time #To measure time it took to mine + block timestamp
+import ast
+import hashlib #to compute merkle root
+from pprint import pprint
+import sys
+import emoji
+from ecdsa import VerifyingKey
+
+from socket import *
+
+DIFFICULTY = (3,)
 def deleteTxOutputs(txid, on):
         file = 'UTXO/UTXO.tmp'
         #by giving a txn, we remove an output from it as UTXO
@@ -68,7 +80,7 @@ def hash_tr(tr):
 
 
 def sumOfFee(mem):
-    txidByFees = []
+	txidByFees = []
 	for txid in mem:
 		tx = ast.literal_eval(mem[txid])
 		pprint(tx)
@@ -89,7 +101,7 @@ def sumOfFee(mem):
 
 		fee = inputAmount - outputAmount
 		txidByFees.append((fee, txid))
-    return txidByFees
+	return txidByFees
 
 def merkle(mem):
 	x = mem.copy()

@@ -9,10 +9,10 @@ import sys
 import emoji
 from ecdsa import VerifyingKey
 
-
+from socket import *
 #LOCAL FILE IMPORTS
 from CommonFunctionLibrary import hash_tr
-
+from CommonFunctionLibrary import DIFFICULTY
 BLOCK_REWARD_GLOB = 10
 
 MINER_PUBLIC_KEY = "TODO"
@@ -32,7 +32,7 @@ def merkle(mem):
 			x = res[i] + res[i-1]
 			hash = hashlib.sha256(x.encode()).hexdigest()
 			resN.append(hash)
-		pprint("Length of merkle tree -> ",len(resN))
+		print("Length of merkle tree -> ",len(resN))
 		pprint("merkle tree -> ")
 		pprint(resN)
 		res = resN.copy()
@@ -108,15 +108,16 @@ def mine(mem):
 	# 	mempool = f.read()
 	# mem = ast.literal_eval(mempool)
 	merkleRoot = merkle(mem)
-	pprint("Merkle root is ", merkleRoot  )
+	print("Merkle root is ",end ='')
+	pprint( merkleRoot  )
 
 	with open('blocks/blockHeaders.txt') as f:
 		d = ast.literal_eval(f.read())
 		lastBlock = list(d.items())[-1]
 		prevHash = lastBlock[0] #get just the block hash
 
-	difficulty = 7 #no of leading bits that should be zero
-
+	#no of leading bits that should be zero is difficulty
+	difficulty = DIFFICULTY[0]
 	blockHeader = {'merkleRoot': merkleRoot,
 			'timeStamp': time.time(), #used to adjust difficulty every 2016 blocks
 			'prevHash' : prevHash,
@@ -138,7 +139,7 @@ def mine(mem):
 
 
 	pprint("Block hash with required difficulty found 🟢")
-	pprint("time took ",time.time() - start, " seconds")
+	print("time took ",time.time() - start, " seconds")
 	pprint(a)
 
 	return blockHeader
@@ -185,7 +186,7 @@ def start(w):
 	newMem = {}
 	
 
-	for txid, tx in mem:
+	for txid, tx in mem.items():
 		if txid in newTxids:
 			newMem[txid] = str(tx)
 
@@ -247,6 +248,7 @@ def send(string):
 def broadcast(bl):
 	print("Sending block ")
 	send("block")
+	bl = [str(i) for i in bl]
 	#bl is a list, first parameter contains block Hash and second one has block Header
 	#third is list of transactions in block, includes coinbase
 	send(bl[0])

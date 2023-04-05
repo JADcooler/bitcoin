@@ -302,13 +302,15 @@ while(1):
 
 
 		m=s.recvfrom(2048)[0] #We are just receiving the block Header
+		
 		blockHash = hashlib.sha256(m).hexdigest()
 		blockHeader = ast.literal_eval(m.decode())
+		print("RECEIVED ",blockHash)
 
 		if(RECV_blHash != blockHash):
 			print("Unequal block hashes")
 		
-		m=s.recvfrom(2048)[0] #LAARRGE Data, may need attention in the near future. is block TXNS
+		m=s.recvfrom(25048)[0] #LAARRGE Data, may need attention in the near future. is block TXNS
 		#----------------------------------------------------------------------------------------		
 		#									BLOCK VERIFYING
 		#----------------------------------------------------------------------------------------
@@ -319,6 +321,10 @@ while(1):
 			print("invalid coinbase transaction count, Expected one. found ", CoinbaseCount )
 			continue
 
+		difficulty = DIFFICULTY[0]
+		if(int(blockHash[:difficulty] ,16) != 0):
+			print("BLOCK HEADER HASH IS NOT BELOW THE THRESHOLD")
+			continue
 
 		merkleRoot = merkle(mem)
 		bl_merkle = blockHeader['merkle']
