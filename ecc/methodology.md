@@ -62,15 +62,31 @@ from the valid ones that are sorted by fees, select X amount of txns to include
 
 ## broadcast block once mined -- DONE
 
-## MAIN_F update where it receives blocks -- IMPLEMENTED
-##	-> validate -- IMPLEMENTED
-##		-> merkleroot, block reward, sum of fees of txns -- IMPLEMENTED
-##	-> uses transactions inside the block txns to update UTXOs.txt
-##	-> python reset to have UTXO.tmp use for mempool
-##	-> Replay tx input deletion of mempool in UTXO.tmp
+## MAIN_F update where it receives blocks -- DONE
+##	-> validate -- DONE
+##		-> merkleroot, block reward, sum of fees of txns -- DONE
+##	-> uses transactions inside the block txns to update UTXOs.txt -- IN PROGRES
+##	-> python reset to have UTXO.tmp use for mempool -- DONE
+##	-> Replay tx input deletion of mempool in UTXO.tmp 
 ##		-> Show and disregard newly discovered invalid inputs
 ## CODE CLEANUP Import common functions from a py avoid duplicates - HOLD
       
+
+leave rest of unmined tx from mempool to be in mempool [MAINB]
+## leave rest of unmined tx from mempool to be in mempool [MAIN_F]
+both these tasks are the same and this means that main_f should ALWAYS 
+be acive even in miners as even if mempool and UTXO.tmp is updated when he's
+mining, the mining process is unaffected
+-> This is done by removing txn from mempool which has any txn from mined block
+by comparing set of txids of mempool and mined block
+if txid in mem:
+   del mempool[txid] //potential solution
+
+## SEND current state of blockchain for nodes requesting it by 
+## sending blockHeaders.txt
+## sending UTXOs.txt
+## sending mempool.txt
+
 -> start mining (miner.py)
 
 // in script, we can choose arbitrary time to start mining.

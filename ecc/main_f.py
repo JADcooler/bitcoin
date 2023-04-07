@@ -209,7 +209,7 @@ def validateAsUTXO(tr):
 def checkCoinbaseCount(mem):
 	c = 0
 	for txid in mem:
-		tx = mem[txid]
+		tx = ast.literal_eval(mem[txid])
 		if(len(tx['inputs']) == 0):
 			c+=1
 	return c
@@ -217,8 +217,8 @@ def checkCoinbaseCount(mem):
 
 def findCoinbase(mem):
 	for txid in mem:
-		tx = mem[txid]
-		if(len(tx['inputs'] == 0)):
+		tx = ast.literal_eval(mem[txid])
+		if(len(tx['inputs']) == 0):
 			return txid
 	return -1
 
@@ -326,23 +326,37 @@ while(1):
 			print("BLOCK HEADER HASH IS NOT BELOW THE THRESHOLD")
 			continue
 
+	
 		merkleRoot = merkle(mem)
-		bl_merkle = blockHeader['merkle']
+		bl_merkle = blockHeader['merkleRoot']
 		if(merkleRoot != bl_merkle):
 			print("MERKLE TREES DON'T MATCH")
 			continue
 
+
+		coinbaseTxid = findCoinbase(mem)
+
 		feeList = sumOfFee(mem)
+		print("\nFEELIST IS feeList",feeList)
 		fees = 0
 		for f in feeList:
-			fees += f[0]
-		coinbaseTxid = findCoinbase(mem)
+			if(f[1] is not coinbaseTxid):
+				fees += f[0]
+
+		
+		
 		if(coinbaseTxid == -1):
 			print("COINBASE TRANSACTION DOESN'T EXIST")
 		coinbaseTx = ast.literal_eval(mem[coinbaseTxid])
 		co_fees = coinbaseTx['outputs'][0]['amount'] - BLOCK_REWARD_GLOB
+
+		print("\nThe negative fees you see above is from the coinbase transaction")
+
+		print("\nInferred fees is ",fees)
+		print("\nBLOCK FEES IS ",co_fees)
+
 		if(co_fees != fees):
-			print("INVALID COINBASE TRANSACTION [OUTPUT AMOUNT IS DIFFERENT THAN EXPECTED] ")
+			print("INVALID COINBASE TRANSACTION [FEE AMOUNT IS DIFFERENT THAN EXPECTED] ")
 
 		#----------------------------------------------------------------------------------------		
 		#									BLOCK VERIFYING

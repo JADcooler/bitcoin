@@ -1,0 +1,11 @@
+So, 
+
+blockHeaders.txt in block/
+
+and 
+
+UTXOs.txt in UTXO/ 
+
+are kinda similar in a way they both are a dictionary of block ID and txns in block
+
+in UTXOs.txt, we delete inputs by None as they come up in mined blocks 

@@ -10,6 +10,33 @@ from ecdsa import VerifyingKey
 from socket import *
 
 DIFFICULTY = (3,)
+
+
+def getAmount(txid, on):
+	#Tx from blocks
+	with open('blocks/blockHeaders.txt') as f:
+		b = f.read()
+	b = ast.literal_eval(b)
+	for block in b:
+		txns = b[block]
+		txns = ast.literal_eval(txns)
+		if txid in txns:
+			tx = ast.literal_eval(txns[txid])
+			if (on >= len(tx['outputs']) ):
+				return (-1,-1)
+			return tx['outputs'][on]['amount']
+
+	#reaches here if referenced txid and on don't exist in blocks
+	with open('mempool.txt') as f:
+		m = f.read()
+	m = ast.literal_eval(m)
+	if txid in m:
+		tx = ast.literal_eval(m[txid])
+		if (on >= len(tx['outputs'])):
+			return (-1,-1)
+		return tx['outputs'][on]['amount']
+	return (-1,-2)
+
 def deleteTxOutputs(txid, on):
         file = 'UTXO/UTXO.tmp'
         #by giving a txn, we remove an output from it as UTXO
@@ -118,10 +145,102 @@ def merkle(mem):
 			x = res[i] + res[i-1]
 			hash = hashlib.sha256(x.encode()).hexdigest()
 			resN.append(hash)
-		pprint("Length of merkle tree -> ",len(resN))
+		print("Length of merkle tree -> ",len(resN))
 		pprint("merkle tree -> ")
 		pprint(resN)
 		res = resN.copy()
 	return res[0]
 
 BLOCK_REWARD_GLOB = 10
+
+def validateAsUTXO(tr, file):
+	def validateAsUTXO(tr):
+
+	#For a transaction to be validated, all its inputs must
+	#exist either in a block or in the mempool.
+
+	pk = tr['inputs'][0]['sigScr']['publicKey']
+	pk = VerifyingKey.from_string(pk.encode('ISO-8859-1'))
+	pk = hashlib.sha256(pk.to_string()).hexdigest()
+
+	a = verifySignature(tr)
+	if(a==False):
+		pprint("INVALID SIGNATURE")
+		return False
+
+	txid = hash_tr(tr)
+
+
+
+	with open(file, 'r') as f:
+		UTXO = f.read()
+	UTXO = ast.literal_eval(UTXO) #get dict of blocks
+
+
+	#checking if all inputs reference the public key of tx maker
+	pprint("	\#checking if all inputs reference the public key of tx maker")
+
+	inputx = [ (i['prev_tran'], i['output_index']) for i in tr['inputs'] ]
+
+	result = True
+	for block in UTXO:
+		txns = ast.literal_eval(UTXO[block])
+		for i in inputx:
+			if i[0] in txns: #i[0] is txid
+				txn = ast.literal_eval(txns[i[0]])
+				print(i[1], len(txn['outputs']))
+				pprint(txn)
+				b = 0
+				try:
+					b = txn['outputs'][i[1]]['pubkey_scr']
+				except IndexError as e:
+					print("Referenced output index doesn't exist",e)
+				except Exception as e:
+					print("UNEXPECTED EXCEPTION ",e)
+				#we expect main.py to send valid output no
+				#so, the last exception would catch if it's None
+				result*= (b == pk)
+
+
+	if(result == False):
+		pprint("NOT ALL INPUTS USED REFERENCE TX SIGNER ")
+		return [(-1,-1)] #code (-1,-1) for invalid output index
+	#____________________________________________
+
+	inputTxids = [ i['prev_tran']+ str(i['output_index'])   for i in tr['inputs'] ]
+
+
+	print("Input prev_trans ")
+	pprint(inputTxids)
+	#approach to combine all transactions with o/p in UTXO and check if
+	#set prev tran is subset of all txids in UTXO
+	allTxids = {}
+	for block in UTXO: #UTXO is of format { 'blockno': str(txns) }
+		tnxs = ast.literal_eval(UTXO[block])
+		for tnx in tnxs: #tnxs is of format { 'txid' : str(tx data) }
+			x = tnxs[tnx]
+			x = ast.literal_eval(x)
+			for output in x['outputs']:
+				if (output is None):
+					continue
+
+				allTxids[tnx + str(output['output_no'])] = x['outputs']
+
+	pprint("all txids in UTXO ")
+
+
+	for i in allTxids:
+		pprint(i)
+
+
+
+	pprint('all prev trans')
+	for i in inputTxids:
+		pprint(i)
+
+	bool = set(inputTxids).issubset(set(allTxids.keys()))
+	print("they are equal? ",bool)
+	if(not bool):
+		return [(-1,-2)]
+
+	return [ (i['prev_tran'], i['output_index']) for i in tr['inputs'] ]
