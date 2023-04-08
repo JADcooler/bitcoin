@@ -74,7 +74,7 @@ def deleteTxOutputsFILE(txid, on, file):
 
         modifyThis = blocks[blockF] #later used as l value
         modifyTxns = ast.literal_eval(modifyThis) #later as l value
-        modifyTxn =ast.literal_eval( modifyTxns[txid]) #later uesd as l value
+        modifyTxn =ast.literal_eval( modifyTxns[txid]) #later used as l value
 
 
         modifyTxn['outputs'][toPop] = None
@@ -86,6 +86,9 @@ def deleteTxOutputsFILE(txid, on, file):
                 f.write(str(blocks))
 
         print("SUCCESFULLY REMOVED OUTPUT",on," FROM",txid)
+
+		
+
         return True
 
 

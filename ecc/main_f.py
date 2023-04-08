@@ -422,7 +422,26 @@ while(1):
 				print("BLOCK UPDATE HALTED")
 				continue
 		
-		print("BLOCK UTXOs.txt UPDATE SUCCESSFUL")
+		print("MINED BLOCK UTXOs.txt INPUT DELETION SUCCESSFUL")
+
+		with open('UTXO/UTXOs.txt') as f:
+			Exis = ast.literal_eval(f.read())
+			Exis[blockHash] = str(mem)
+
+		
+		with open('UTXO/UTXOs.txt','w') as f:
+			f.write(str(Exis))
+
+		print("APPENDED TRANSACTIONS FROM MINED BLOCK TO UTXOs.txt")
+
+		with open('blocks/blockHeaders.txt') as f:
+			Exis = ast.literal_eval(f.read())
+			Exis[blockHash] = str(mem)
+		with open('blocks/blockHeaders.txt','w') as f:
+			f.write(str(Exis))
+
+		print("APPENDED TRANSACTIONS FROM MINED BLOCK TO BLOCKHEADERS.txt")
+
 		#----------------------------------------------------------------------------------------
 		#									UTXOs UPDATE
 		#----------------------------------------------------------------------------------------

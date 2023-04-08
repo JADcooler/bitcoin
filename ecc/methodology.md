@@ -41,11 +41,11 @@
 ## UPDATE UTXO.tmp from received transactions --DONE
 	#-> add mempool UTXOs to UTXO.tmp
 
-## FIX NEGATIVE FEE AMOUNT BUG ON SPENDING LAST UTXO -- HOLD
+## FIX NEGATIVE FEE AMOUNT BUG ON SPENDING LAST UTXO -- DONE
 
 ## DISPLAY BALANCE -- HOLD
 
-## PRETTY PRINT EVERYWHERE -- PRIORITY HOLD 
+## PRETTY PRINT EVERYWHERE -- DONE
 
 ## use multiple keys to test -- DONE
 
@@ -65,7 +65,7 @@ from the valid ones that are sorted by fees, select X amount of txns to include
 ## MAIN_F update where it receives blocks -- DONE
 ##	-> validate -- DONE
 ##		-> merkleroot, block reward, sum of fees of txns -- DONE
-##	-> uses transactions inside the block txns to update UTXOs.txt -- IN PROGRESS (UTXOs.txt new txn addition pending, existing inputs referenced deletion completed)
+##	-> uses transactions inside the block txns to update UTXOs.txt -- DONE
 ##	-> python reset to have UTXO.tmp use for mempool -- DONE
 ##	-> Replay tx input deletion of mempool in UTXO.tmp 
 ##		-> Show and disregard newly discovered invalid inputs
@@ -75,10 +75,10 @@ from the valid ones that are sorted by fees, select X amount of txns to include
 it's important to validate transactions such that input - output amount is positive
 ## VALIDATE AMOUNT USED IN validateTr -- DONE
 
-## ADD BLOCK_HASH : STR( TXNS) IN BLOCKHEADERS.txt
+## ADD BLOCK_HASH : STR( TXNS) IN BLOCKHEADERS.txt -- DONE
 
 leave rest of unmined tx from mempool to be in mempool [MAINB]
-## leave rest of unmined tx from mempool to be in mempool [MAIN_F]
+## leave rest of unmined tx from mempool to be in mempool [MAIN_F] -- PRIORITY HOLD
 both these tasks are the same and this means that main_f should ALWAYS 
 be acive even in miners as even if mempool and UTXO.tmp is updated when he's
 mining, the mining process is unaffected
@@ -105,10 +105,13 @@ if txid in mem:
    //tr tr ah we can send instead of in bulk. in case some
    //new node requests it.
 
-
+## REVERT TO PAST FILE (EITHER UTXO.tmp or UTXOs.txt) from backup, if exception
+have UTXOs.txt.b file, blockHeaders.txt.b file, at start of exception prone parts of code
+REVERT once exception is found by copy pasting such that changes made are nullified
 
 # CLEAN ECC DIRECTORY .PY FILES 
 ## EXPLAIN HANDLE MESSAGE ERRORS AND ALL EXCEPTIONS IN DOCS FOR KIDS
+## VISUAL REPRESENTATION OF ALL METHODS AND FLOW IN DOCS
 --------------------------------------------------------------------
 
 intermediary steps/plans
