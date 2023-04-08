@@ -65,12 +65,17 @@ from the valid ones that are sorted by fees, select X amount of txns to include
 ## MAIN_F update where it receives blocks -- DONE
 ##	-> validate -- DONE
 ##		-> merkleroot, block reward, sum of fees of txns -- DONE
-##	-> uses transactions inside the block txns to update UTXOs.txt -- IN PROGRES
+##	-> uses transactions inside the block txns to update UTXOs.txt -- IN PROGRESS (UTXOs.txt new txn addition pending, existing inputs referenced deletion completed)
 ##	-> python reset to have UTXO.tmp use for mempool -- DONE
 ##	-> Replay tx input deletion of mempool in UTXO.tmp 
 ##		-> Show and disregard newly discovered invalid inputs
 ## CODE CLEANUP Import common functions from a py avoid duplicates - HOLD
       
+## CHECK PLACES WHERE AMOUNT USED IS VALIDATED -- DONE
+it's important to validate transactions such that input - output amount is positive
+## VALIDATE AMOUNT USED IN validateTr -- DONE
+
+## ADD BLOCK_HASH : STR( TXNS) IN BLOCKHEADERS.txt
 
 leave rest of unmined tx from mempool to be in mempool [MAINB]
 ## leave rest of unmined tx from mempool to be in mempool [MAIN_F]
@@ -103,8 +108,8 @@ if txid in mem:
 
 
 # CLEAN ECC DIRECTORY .PY FILES 
-
-----------------------------------------------------------------
+## EXPLAIN HANDLE MESSAGE ERRORS AND ALL EXCEPTIONS IN DOCS FOR KIDS
+--------------------------------------------------------------------
 
 intermediary steps/plans
 

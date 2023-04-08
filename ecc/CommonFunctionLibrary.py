@@ -37,11 +37,11 @@ def getAmount(txid, on):
 		return tx['outputs'][on]['amount']
 	return (-1,-2)
 
-def deleteTxOutputs(txid, on):
-        file = 'UTXO/UTXO.tmp'
+def deleteTxOutputsFILE(txid, on, file):
+        #This verion uses file string from parameter
         #by giving a txn, we remove an output from it as UTXO
 
-        print("DELETING ",txid, " OUTPUT ", on)
+        print("DELETING ",txid, " OUTPUT ", on, " FILE PARAMETER COMMONFUNCTIONLIBRARY VERSION")
 
         with open(file, 'r') as f:
                 blocks = ast.literal_eval(f.read())
@@ -90,11 +90,16 @@ def deleteTxOutputs(txid, on):
 
 
 def handleError(args):
+	if(args is None):
+		return True
 	if(args[0]  == (-1,-1)):
 		print("[FATAL ERROR] INVALID OUTPUT INDEX REFERENCED, DOESN'T EXIST OR HAS BEEN USED \n\n")
 		return False
 	elif(args[0] == (-1,-2)):
 		print("[FATAL ERROR] INPUT TXN AND OUTPUT INDEX DON'T EXIST IN UTXO SET")
+		return False
+	elif(args[0] == (-2,-1)):
+		print("[FATAL ERROR] OUTPUT AMOUNT IS GREATER THAN INPUT AMOUNT FOR NON-COINBASE TXN\n\n")
 		return False
 	return True
 
@@ -153,15 +158,55 @@ def merkle(mem):
 
 BLOCK_REWARD_GLOB = 10
 
-def validateAsUTXO(tr, file):
-	def validateAsUTXO(tr):
+def verifySignature(tr):
+	print('splitting inputs of txid',hash_tr(tr))
+
+	flag = 1
+	for inp in tr['inputs']:
+		prev_tran = inp['prev_tran']
+		output_index = inp['output_index']
+		sigScr = inp['sigScr']
+
+		textToGet = prev_tran + str(output_index)
+
+		pubkey = sigScr['publicKey']
+		signature = sigScr['signature']
+
+		dPub = VerifyingKey.from_string(pubkey.encode('ISO-8859-1'))
+		dSig = signature.encode('ISO-8859-1')
+
+		x = dPub.verify(dSig, textToGet.encode('ISO-8859-1'))
+		print("\t\tTHE RESULT IS ",x)
+		if(x == False):
+			flag=0
+
+	pprint("THIS SAYS THE PERSON WHO GAVE THE SIGNATURE WITH PUBLIC KEY, HAD ACTUALLY USED HIS PRIVATE KEY TO ENCRYPT PREV_TXID AND OUTPUT INDEX")
+	pprint("THIS IS USED SUCH THAT ONLY THE PERSON IN POSSESSION OF THE PRIVATE KEY FOR THAT PUBLIC KEY CAN USE HIS FUNDS")
+	pprint("---------------------------------------------------------------------------------")
+	pprint("THE REST WE HAVE TO DO IS VERIFY THAT THE INPUT REFERENCED EXISTS IN UTXO SET AND IS PAID TO TO HIM AND NOT OTHERS")
+
+
+def validateAsUTXOFILE(tr, file):
+	
+	##THIS FUNCTION IS USED TO VALIDATE TRANSACTIONS ONCE BLOCK IS RECEIVED IN MAIN_F(RECEIVER)
 
 	#For a transaction to be validated, all its inputs must
 	#exist either in a block or in the mempool.
 
+	#This function is made to validate only non coinbase txns, so if a txn is coinbase, we return None
+	#The params returned when used in deleteUTXO should be checked if it is none
+
+	#There are other functions to determine if fees, miner fee and no of coinbase tx is correct
+	#in BLOCK VERIFYING SECTION
+
+	if(len(tr['inputs']) == 0 ):#This part is different from validateAsUTXO(tr). only blocks have coinbase
+		return None			#This should throw error in normal validateAsUTXO as its coinbase
+							#And Coinbase TXNS are not meant to be received in mempool or transaction
+
 	pk = tr['inputs'][0]['sigScr']['publicKey']
 	pk = VerifyingKey.from_string(pk.encode('ISO-8859-1'))
 	pk = hashlib.sha256(pk.to_string()).hexdigest()
+	##GETS PUBLIC KEY FROM INPUT OF TRANSACTION
 
 	a = verifySignature(tr)
 	if(a==False):
@@ -169,18 +214,20 @@ def validateAsUTXO(tr, file):
 		return False
 
 	txid = hash_tr(tr)
-
+	##HASH TRANSACTION
 
 
 	with open(file, 'r') as f:
 		UTXO = f.read()
 	UTXO = ast.literal_eval(UTXO) #get dict of blocks
-
+	##PARSE IT AS BLOCK_ID: STR TXNS
 
 	#checking if all inputs reference the public key of tx maker
 	pprint("	\#checking if all inputs reference the public key of tx maker")
 
 	inputx = [ (i['prev_tran'], i['output_index']) for i in tr['inputs'] ]
+
+	inputAmount = 0	#adding amount validation
 
 	result = True
 	for block in UTXO:
@@ -193,14 +240,25 @@ def validateAsUTXO(tr, file):
 				b = 0
 				try:
 					b = txn['outputs'][i[1]]['pubkey_scr']
+					inputAmount+=int(txn['outputs'][i[1]]['amount']) #adding amount validation
 				except IndexError as e:
 					print("Referenced output index doesn't exist",e)
 				except Exception as e:
 					print("UNEXPECTED EXCEPTION ",e)
 				#we expect main.py to send valid output no
 				#so, the last exception would catch if it's None
-				result*= (b == pk)
+				result*= (b == pk) #RESULT IS TRUE IF try block got executed
 
+	outputAmount = 0 #adding amount validation
+
+	for i in tr['outputs']: #adding amount validation
+		outputAmount += int(i['amount']) #adding amount validation
+
+	print("FEES CONTRIBUTED BY THIS TRANSACTION TO MINER IS ",inputAmount - outputAmount)
+	#adding amount validation
+	if(outputAmount > inputAmount ): #IF MONEY GREATER THAT WHAT WE GET FROM UTXO IS USED, FATAL ERROR
+		pprint("INVALID AMOUNT USED FOR NON COINBASE TRANSACTION")
+		return [(-2,-1)] #code (-2,-1) for invalid amount
 
 	if(result == False):
 		pprint("NOT ALL INPUTS USED REFERENCE TX SIGNER ")
@@ -208,7 +266,9 @@ def validateAsUTXO(tr, file):
 	#____________________________________________
 
 	inputTxids = [ i['prev_tran']+ str(i['output_index'])   for i in tr['inputs'] ]
+	#EACH INPUT THAT CAN IDENTIFY AN OUTPUT THAT WAS USED IS USED AS A SINGLE STRING
 
+	
 
 	print("Input prev_trans ")
 	pprint(inputTxids)
@@ -244,3 +304,7 @@ def validateAsUTXO(tr, file):
 		return [(-1,-2)]
 
 	return [ (i['prev_tran'], i['output_index']) for i in tr['inputs'] ]
+	#RETURNING CAUSE VALIDATION IS COMPLETE AND MEANT AS INPUT TO DELETETXOUTPUT
+
+	##NOTE THAT THERE IS AN IMPLICIT TRUST OF THE TX WE USE AS INPUTS. SO WE DON'T CHECK AMOUNT
+	##MAYBE WE CAN? CHECK OUTPUTS USED AND INPUT PREV_TRAN OUTPUTS USED AND IF THEY ALLOW fees>=0

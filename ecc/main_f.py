@@ -105,11 +105,16 @@ def deleteTxOutputs(txid, on):
 
 
 def handleError(args):
+	if(args is None):
+		return True
 	if(args[0]  == (-1,-1)):
-		pprint("[FATAL ERROR] INVALID OUTPUT INDEX REFERENCED, DOESN'T EXIST OR HAS BEEN USED \n\n")
+		print("[FATAL ERROR] INVALID OUTPUT INDEX REFERENCED, DOESN'T EXIST OR HAS BEEN USED \n\n")
 		return False
 	elif(args[0] == (-1,-2)):
-		pprint("[FATAL ERROR] INPUT TXN AND OUTPUT INDEX DON'T EXIST IN UTXO SET")
+		print("[FATAL ERROR] INPUT TXN AND OUTPUT INDEX DON'T EXIST IN UTXO SET\n\n")
+		return False
+	elif(args[0] == (-2,-1)):
+		print("[FATAL ERROR] OUTPUT AMOUNT IS GREATER THAN INPUT AMOUNT FOR NON-COINBASE TXN\n\n")
 		return False
 	return True
 
@@ -142,6 +147,8 @@ def validateAsUTXO(tr):
 
 	inputx = [ (i['prev_tran'], i['output_index']) for i in tr['inputs'] ]
 
+	inputAmount = 0	#adding amount validation
+
 	result = True
 	for block in UTXO:
 		txns = ast.literal_eval(UTXO[block])
@@ -153,6 +160,7 @@ def validateAsUTXO(tr):
 				b = 0
 				try:
 					b = txn['outputs'][i[1]]['pubkey_scr']
+					inputAmount+=int(txn['outputs'][i[1]]['amount']) #adding amount validation
 				except IndexError as e:
 					print("Referenced output index doesn't exist",e)
 				except Exception as e:
@@ -161,6 +169,16 @@ def validateAsUTXO(tr):
 				#so, the last exception would catch if it's None
 				result*= (b == pk)
 
+	outputAmount = 0 #adding amount validation
+
+	for i in tr['outputs']: #adding amount validation
+		outputAmount += int(i['amount']) #adding amount validation
+
+	print("FEES CONTRIBUTED BY THIS TRANSACTION TO MINER IS ",inputAmount - outputAmount)
+	#adding amount validation
+	if(outputAmount > inputAmount ): #IF MONEY GREATER THAT WHAT WE GET FROM UTXO IS USED, FATAL ERROR
+		pprint("INVALID AMOUNT USED FOR NON COINBASE TRANSACTION")
+		return [(-2,-1)] #code (-2,-1) for invalid amount
 
 	if(result == False):
 		pprint("NOT ALL INPUTS USED REFERENCE TX SIGNER ")
@@ -213,7 +231,7 @@ def checkCoinbaseCount(mem):
 		if(len(tx['inputs']) == 0):
 			c+=1
 	return c
-	
+
 
 def findCoinbase(mem):
 	for txid in mem:
@@ -294,7 +312,7 @@ while(1):
 			f.write(str(u))
 
 
-		#with open('mempool.txt',mode='a+') as file: 
+		#with open('mempool.txt',mode='a+') as file:
 		#	file.write(str(trans)+'\n')
 	elif(x=='block'):
 		m=s.recvfrom(1024)[0] #block Hash
@@ -302,16 +320,16 @@ while(1):
 
 
 		m=s.recvfrom(2048)[0] #We are just receiving the block Header
-		
+
 		blockHash = hashlib.sha256(m).hexdigest()
 		blockHeader = ast.literal_eval(m.decode())
 		print("RECEIVED ",blockHash)
 
 		if(RECV_blHash != blockHash):
 			print("Unequal block hashes")
-		
+
 		m=s.recvfrom(25048)[0] #LAARRGE Data, may need attention in the near future. is block TXNS
-		#----------------------------------------------------------------------------------------		
+		#----------------------------------------------------------------------------------------
 		#									BLOCK VERIFYING
 		#----------------------------------------------------------------------------------------
 		mem = ast.literal_eval(m.decode())
@@ -326,7 +344,7 @@ while(1):
 			print("BLOCK HEADER HASH IS NOT BELOW THE THRESHOLD")
 			continue
 
-	
+
 		merkleRoot = merkle(mem)
 		bl_merkle = blockHeader['merkleRoot']
 		if(merkleRoot != bl_merkle):
@@ -343,8 +361,8 @@ while(1):
 			if(f[1] is not coinbaseTxid):
 				fees += f[0]
 
-		
-		
+
+
 		if(coinbaseTxid == -1):
 			print("COINBASE TRANSACTION DOESN'T EXIST")
 		coinbaseTx = ast.literal_eval(mem[coinbaseTxid])
@@ -358,8 +376,55 @@ while(1):
 		if(co_fees != fees):
 			print("INVALID COINBASE TRANSACTION [FEE AMOUNT IS DIFFERENT THAN EXPECTED] ")
 
-		#----------------------------------------------------------------------------------------		
+		#----------------------------------------------------------------------------------------
 		#									BLOCK VERIFYING
+		#----------------------------------------------------------------------------------------
+
+		#----------------------------------------------------------------------------------------
+		#									UTXOs UPDATE
+		#----------------------------------------------------------------------------------------
+		# Now, we verify if each tx inside the block is valid through validateTr(tr, file)
+		# Using file as UTXOs.txt
+		# If all txns are valid in block, we append all returned params of validateTr, compile them
+		# and call deleteTX with file UTXOs.txt
+		# We validate all txns except coinbase, as its done already in a different manner
+
+		delThis = []
+		halt = False
+		for tr in mem:#mempool (mem obj) is of txid: str(tx) format
+			tx = ast.literal_eval(mem[tr])
+			params = validateAsUTXOFILE(tx, "UTXO/UTXOs.txt")
+
+			cont = handleError(params)
+			if(not cont):
+				halt = True
+				break
+			if(params is not None):
+				delThis.append(params)
+		
+		print("DELTHIS LIST IS NOW")
+		pprint(delThis)
+
+		if(halt):
+			print("BLOCK UPDATE HALTED")
+			continue
+
+		#DELETING ALL TX INPUTS USED IN BLOCK TRANSACTIONS
+		
+		for params in delThis:
+			flag = 1
+			for i in params:
+				bool = deleteTxOutputsFILE(i[0], i[1], "UTXO/UTXOs.txt")
+				if(not bool):
+					pprint("DELETE TX FAILED for (txid, on) ",i)
+					flag = 0
+			if(not flag):
+				print("BLOCK UPDATE HALTED")
+				continue
+		
+		print("BLOCK UTXOs.txt UPDATE SUCCESSFUL")
+		#----------------------------------------------------------------------------------------
+		#									UTXOs UPDATE
 		#----------------------------------------------------------------------------------------
 
 
