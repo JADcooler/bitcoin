@@ -12,6 +12,17 @@ from socket import *
 DIFFICULTY = (3,)
 
 
+
+def getPublicKeyHash():
+	with open('ecc_public.pem', mode='r') as f:
+		public_key=VerifyingKey.from_pem(f.read()) #public key
+	
+	pubkeyhash = hashlib.sha256(public_key.to_string()).hexdigest()
+
+	return pubkeyhash
+
+MINER_PUBLIC_KEY = getPublicKeyHash()
+
 def getAmount(txid, on):
 	#Tx from blocks
 	with open('blocks/blockHeaders.txt') as f:

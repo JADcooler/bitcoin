@@ -78,7 +78,7 @@ it's important to validate transactions such that input - output amount is posit
 ## ADD BLOCK_HASH : STR( TXNS) IN BLOCKHEADERS.txt -- DONE
 
 leave rest of unmined tx from mempool to be in mempool [MAINB]
-## leave rest of unmined tx from mempool to be in mempool [MAIN_F] -- PRIORITY HOLD
+## leave rest of unmined tx from mempool to be in mempool [MAIN_F] -- DONE
 both these tasks are the same and this means that main_f should ALWAYS 
 be acive even in miners as even if mempool and UTXO.tmp is updated when he's
 mining, the mining process is unaffected
@@ -87,7 +87,11 @@ by comparing set of txids of mempool and mined block
 if txid in mem:
    del mempool[txid] //potential solution
 
-## SEND current state of blockchain for nodes requesting it by 
+
+## STRESS TEST -- IN PROGRESS
+## basic single node test - Done
+
+## SEND current state of blockchain for nodes requesting it by -- HOLD
 ## sending blockHeaders.txt
 ## sending UTXOs.txt
 ## sending mempool.txt

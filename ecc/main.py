@@ -39,6 +39,7 @@ pubkeyhash = hashlib.sha256(public_key.to_string()).hexdigest()
 
 
 def neededUTXO(amount):
+	amount = int(amount)
 	utxos = UTXOs()
 	total = 0
 	for tr in utxos:
@@ -194,7 +195,8 @@ def checkUserFromTXNS(txns):
 			if (i['pubkey_scr']==pkhash):
 				print("APPENDED TR WITH TXID ",hash_tr(tr), "WITH OUTPUT INDEX",w )
 				utxo.append((txid, w, tr['outputs'][w]['amount'] ))
-				print(utxo)
+				
+	print("\nUTXOS : ",utxo,"\n")
 	return utxo
 
 def UTXOs():
@@ -325,7 +327,8 @@ elif(choice==3):
 if(choice==9):
 	x = input('Enter amount ')
 	x = neededUTXO(x)
-	print(x)
+	print("\nNEEDED UTXOs are ")
+	pprint(x)
 
 if(choice==10):
 	x=input('amount ')

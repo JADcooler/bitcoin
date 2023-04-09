@@ -14,8 +14,7 @@ from socket import *
 from CommonFunctionLibrary import hash_tr
 from CommonFunctionLibrary import DIFFICULTY
 BLOCK_REWARD_GLOB = 10
-
-MINER_PUBLIC_KEY = "TODO"
+from CommonFunctionLibrary import MINER_PUBLIC_KEY
 
 def merkle(mem):
 	x = mem.copy()

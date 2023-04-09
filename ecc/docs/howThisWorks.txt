@@ -1,0 +1,16 @@
+This BITCOIN PROJECT uses the UTXO model and mining block method to verify transactions 
+just like the real one
+
+It uses the local LAN broadcast address as a replacement for the P2P network in the
+real bitcoin.
+
+All devices operating in the same LAN should work
+
+This includes :
+    * All devices connected to the same WIFI (eg: ITdepartment)
+    * All devices in the LAB
+    * All devices in a local WIFI hotspot (can use termux)
+
+This relying on the P2P network is similar in the fact that the more the participents
+better the reliability against common attack vectors
+
