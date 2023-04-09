@@ -211,6 +211,16 @@ def UTXOs():
 		[ userUTXO.append(i) for i in userTXNS]
 		print(userUTXO)
 
+	with open('UTXO/UTXOs.txt') as f:
+		UTXO = f.read()
+	UTXO = ast.literal_eval(UTXO)
+	for block in UTXO:
+		txns = ast.literal_eval(UTXO[block])
+		print("PROCESSING ",block)
+		userTXNS = checkUserFromTXNS(txns)
+		[ userUTXO.append(i)  if i not in userUTXO else '' for i in userTXNS]
+		print(userUTXO)
+
 	return userUTXO
 
 
