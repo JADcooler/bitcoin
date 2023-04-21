@@ -132,3 +132,5 @@ intermediary steps/plans
 // when there's a block received. we deleteUTXO() in UTXO.txt
 // if some input doesn't exist, we reject block
 
+### BUGS
+# MAIN.py shows balance where MAIN_F does not. -- high priority hold

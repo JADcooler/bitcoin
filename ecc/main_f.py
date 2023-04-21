@@ -167,6 +167,12 @@ def validateAsUTXO(tr):
 					print("UNEXPECTED EXCEPTION ",e)
 				#we expect main.py to send valid output no
 				#so, the last exception would catch if it's None
+
+				print("\033[1;31m\n<-- we expect main.py to send valid output no")
+				print("\033[1;31mso, the last exception would catch if it's None")
+				print("\033[1;31mThis means the previous tx user is trying to reference")
+				print("\033[1;31mIS ALREADY USED -->\n")
+				print("\033[1;37m")
 				result*= (b == pk)
 
 	outputAmount = 0 #adding amount validation
