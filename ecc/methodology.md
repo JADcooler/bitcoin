@@ -133,5 +133,7 @@ intermediary steps/plans
 // if some input doesn't exist, we reject block
 
 ### BUGS
-# MAIN.py shows balance where MAIN_F does not. -- in progress
+# MAIN.py shows balance where MAIN_F does not. -- done
 	#UTXO.tmp has different block ID but same coinbase????
+
+## TO IMPLEMENT auto reset, after mining UTXO.tmp should be equal to UTXOs.txt done

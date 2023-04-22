@@ -2,8 +2,6 @@ import ast
 from pprint import pprint
 import sys
 
-choice = sys.argv[1]
-
 
 def func(file):
     dic = {}

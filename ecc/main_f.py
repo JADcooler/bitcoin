@@ -168,7 +168,7 @@ def validateAsUTXO(tr):
 				#we expect main.py to send valid output no
 				#so, the last exception would catch if it's None
 
-				print("\033[1;31m\n<-- we expect main.py to send valid output no")
+				print("`\033[1;31m`\n<-- we expect main.py to send valid output no")
 				print("\033[1;31mso, the last exception would catch if it's None")
 				print("\033[1;31mThis means the previous tx user is trying to reference")
 				print("\033[1;31mIS ALREADY USED -->\n")
@@ -475,6 +475,20 @@ while(1):
 		#----------------------------------------------------------------------------------------
 		#									mempool UPDATE
 		#----------------------------------------------------------------------------------------
+		#----------------------------------------------------------------------------------------
+		#									UTXO.tmp UPDATE
+		#----------------------------------------------------------------------------------------
+		
+		with open('UTXO/UTXOs.txt') as f:
+			per = f.read()
+		
+		with open('UTXO/UTXO.tmp','w') as f:
+			f.write(per)
+		
+		#----------------------------------------------------------------------------------------
+		#									UTXO.tmp UPDATE
+		#----------------------------------------------------------------------------------------
+
 
 
 #END
