@@ -133,4 +133,5 @@ intermediary steps/plans
 // if some input doesn't exist, we reject block
 
 ### BUGS
-# MAIN.py shows balance where MAIN_F does not. -- high priority hold
+# MAIN.py shows balance where MAIN_F does not. -- in progress
+	#UTXO.tmp has different block ID but same coinbase????

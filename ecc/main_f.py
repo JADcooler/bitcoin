@@ -395,11 +395,16 @@ while(1):
 		# and call deleteTX with file UTXOs.txt
 		# We validate all txns except coinbase, as its done already in a different manner
 
+		# We use UTXOs.txt because it contains valid transactions, those that are mined.
+		# and not UTXO.tmp because it has uncondirmed transactions in the mempool, and miner can 
+		# place his mempool which might be different than the one user has.
+
+
 		delThis = []
 		halt = False
 		for tr in mem:#mempool (mem obj) is of txid: str(tx) format
 			tx = ast.literal_eval(mem[tr])
-			params = validateAsUTXOFILE(tx, "UTXO/UTXOs.txt")
+			params = validateAsUTXOFILE(tx, "UTXO/UTXOs.txt") #validate tx using UTXOs.txt as list of UTXOs
 
 			cont = handleError(params)
 			if(not cont):

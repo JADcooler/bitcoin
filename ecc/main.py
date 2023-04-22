@@ -211,6 +211,10 @@ def UTXOs():
 		[ userUTXO.append(i) for i in userTXNS]
 		print(userUTXO)
 
+	print("\033[1;34m\nNOW PROCESSING UTXOs.txt\n\033[0m")
+	#we don't need to read from UTXOs.txt, it adds used up txids as valid inputs
+	#and causes fatal bugs
+	'''
 	with open('UTXO/UTXOs.txt') as f:
 		UTXO = f.read()
 	UTXO = ast.literal_eval(UTXO)
@@ -220,7 +224,7 @@ def UTXOs():
 		userTXNS = checkUserFromTXNS(txns)
 		[ userUTXO.append(i)  if i not in userUTXO else '' for i in userTXNS]
 		print(userUTXO)
-
+	'''
 	return userUTXO
 
 
