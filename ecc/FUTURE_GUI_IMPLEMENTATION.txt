@@ -1,3 +1,7 @@
+Add scale widget for spending balance, max being remaining balance.
+
+
+==================================================
 yes, check python multi processing.
 Or multi threading (you have to customize the other script and import it in the main script to make it run from the parent script).
 
